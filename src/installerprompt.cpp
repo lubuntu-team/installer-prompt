@@ -21,6 +21,7 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     ui->installLubuntu->setAttribute(Qt::WA_TranslucentBackground);
     ui->installLubuntu->setStyleSheet(css);
 
+    // Slots and signals
     connect(ui->tryLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::tryLubuntu);
 }
 
