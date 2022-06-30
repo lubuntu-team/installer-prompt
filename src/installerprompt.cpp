@@ -1,9 +1,9 @@
-#include "mainwindow.h"
-#include "./ui_mainwindow.h"
+#include "installerprompt.h"
+#include "./ui_installerprompt.h"
 
-MainWindow::MainWindow(QWidget *parent)
+InstallerPrompt::InstallerPrompt(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , ui(new Ui::InstallerPrompt)
 {
     ui->setupUi(this);
 
@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->installLubuntu->setStyleSheet("background-color: rgba(0, 104, 200, 100);");
 }
 
-MainWindow::~MainWindow()
+InstallerPrompt::~InstallerPrompt()
 {
     delete ui;
 }
