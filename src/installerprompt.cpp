@@ -17,6 +17,13 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     // Set the button colors
     ui->tryLubuntu->setStyleSheet("background-color: rgba(0, 104, 200, 100);");
     ui->installLubuntu->setStyleSheet("background-color: rgba(0, 104, 200, 100);");
+
+    connect(ui->tryLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::tryLubuntu);
+}
+
+void InstallerPrompt::tryLubuntu()
+{
+    QApplication::quit();
 }
 
 InstallerPrompt::~InstallerPrompt()

@@ -15,6 +15,9 @@ public:
     InstallerPrompt(QWidget *parent = nullptr);
     ~InstallerPrompt();
 
+public slots:
+    void tryLubuntu();
+
 private:
     Ui::InstallerPrompt *ui;
 };
