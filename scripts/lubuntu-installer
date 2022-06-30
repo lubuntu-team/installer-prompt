@@ -1,0 +1,3 @@
+#!/bin/bash
+
+pkexec calamares -D6

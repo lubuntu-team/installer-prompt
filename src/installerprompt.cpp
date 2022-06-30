@@ -10,7 +10,7 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     ui->setupUi(this);
 
     // Set the background image and scale it
-    QPixmap bg("../img/background.png");
+    QPixmap bg("/usr/share/lubuntu/installer-prompt/background.png");
     QScreen *screen = QGuiApplication::primaryScreen();
     QRect screenGeometry = screen->geometry();
 
@@ -45,7 +45,7 @@ void InstallerPrompt::tryLubuntu()
 void InstallerPrompt::installLubuntu()
 {
     QProcess *calamares = new QProcess(this);
-    calamares->start("/usr/bin/pkexec /usr/bin/calamares");
+    calamares->start("/usr/bin/lubuntu-installer");
 }
 
 InstallerPrompt::~InstallerPrompt()
