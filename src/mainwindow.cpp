@@ -8,7 +8,7 @@ MainWindow::MainWindow(QWidget *parent)
     ui->setupUi(this);
 
     // Set the background image, and let it change with the release
-    QPixmap bg("/usr/share/lubuntu/wallpapers/lubuntu-default-wallpaper.png");
+    QPixmap bg("../img/background.png");
     bg = bg.scaled(this->size(), Qt::IgnoreAspectRatio);
     QPalette palette;
     palette.setBrush(QPalette::Window, bg);
