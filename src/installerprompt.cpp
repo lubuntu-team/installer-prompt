@@ -15,8 +15,11 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     this->setPalette(palette);
 
     // Set the button colors
-    ui->tryLubuntu->setStyleSheet("background-color: rgba(0, 104, 200, 100);");
-    ui->installLubuntu->setStyleSheet("background-color: rgba(0, 104, 200, 100);");
+    QString css = "background-color: rgba(0, 104, 200, 100); color: white; border-radius: 15px;";
+    ui->tryLubuntu->setAttribute(Qt::WA_TranslucentBackground);
+    ui->tryLubuntu->setStyleSheet(css);
+    ui->installLubuntu->setAttribute(Qt::WA_TranslucentBackground);
+    ui->installLubuntu->setStyleSheet(css);
 
     connect(ui->tryLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::tryLubuntu);
 }
@@ -30,4 +33,3 @@ InstallerPrompt::~InstallerPrompt()
 {
     delete ui;
 }
-
