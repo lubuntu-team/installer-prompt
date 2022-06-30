@@ -1,0 +1,15 @@
+diff --git a/src/installerprompt.ui b/src/installerprompt.ui
+index cac23f0..8502d40 100644
+--- a/src/installerprompt.ui
++++ b/src/installerprompt.ui
+@@ -18,8 +18,8 @@
+   </property>
+   <property name="maximumSize">
+    <size>
+-    <width>1920</width>
+-    <height>1080</height>
++    <width>10000</width>
++    <height>10000</height>
+    </size>
+   </property>
+   <property name="windowTitle">
