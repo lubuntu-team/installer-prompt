@@ -24,76 +24,15 @@
     <property name="geometry">
      <rect>
       <x>0</x>
-      <y>30</y>
+      <y>20</y>
       <width>1921</width>
-      <height>1021</height>
+      <height>1031</height>
      </rect>
     </property>
     <layout class="QVBoxLayout" name="mainLayout">
      <property name="sizeConstraint">
       <enum>QLayout::SetMaximumSize</enum>
      </property>
-     <item>
-      <layout class="QHBoxLayout" name="logoLayout" stretch="0,0,0">
-       <property name="sizeConstraint">
-        <enum>QLayout::SetMaximumSize</enum>
-       </property>
-       <item>
-        <spacer name="leftLogoSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-       <item>
-        <widget class="QLabel" name="logolabel">
-         <property name="minimumSize">
-          <size>
-           <width>128</width>
-           <height>128</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>128</width>
-           <height>128</height>
-          </size>
-         </property>
-         <property name="baseSize">
-          <size>
-           <width>128</width>
-           <height>128</height>
-          </size>
-         </property>
-         <property name="text">
-          <string/>
-         </property>
-         <property name="alignment">
-          <set>Qt::AlignCenter</set>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <spacer name="rightLogoSpacer">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-         <property name="sizeHint" stdset="0">
-          <size>
-           <width>40</width>
-           <height>20</height>
-          </size>
-         </property>
-        </spacer>
-       </item>
-      </layout>
-     </item>
      <item>
       <layout class="QHBoxLayout" name="titleLayout" stretch="1,0,1">
        <property name="sizeConstraint">
@@ -131,6 +70,12 @@
            <width>128</width>
            <height>128</height>
           </size>
+         </property>
+         <property name="font">
+          <font>
+           <family>Ubuntu</family>
+           <pointsize>12</pointsize>
+          </font>
          </property>
          <property name="styleSheet">
           <string notr="true">QLabel { color : white; font-family: Ubuntu;}</string>
@@ -190,11 +135,11 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_3">
+        <widget class="QPushButton" name="tryLubuntu">
          <property name="minimumSize">
           <size>
-           <width>400</width>
-           <height>200</height>
+           <width>250</width>
+           <height>75</height>
           </size>
          </property>
          <property name="font">
@@ -202,6 +147,12 @@
            <family>Ubuntu</family>
            <pointsize>24</pointsize>
           </font>
+         </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
+         <property name="styleSheet">
+          <string notr="true"/>
          </property>
          <property name="text">
           <string>Try Lubuntu</string>
@@ -222,11 +173,11 @@
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="installLubuntu">
          <property name="minimumSize">
           <size>
-           <width>400</width>
-           <height>200</height>
+           <width>250</width>
+           <height>75</height>
           </size>
          </property>
          <property name="font">
@@ -254,6 +205,45 @@
         </spacer>
        </item>
       </layout>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_3">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_5">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
      </item>
      <item>
       <spacer name="verticalSpacer_2">

@@ -14,11 +14,9 @@ MainWindow::MainWindow(QWidget *parent)
     palette.setBrush(QPalette::Window, bg);
     this->setPalette(palette);
 
-    // Set the top label as the Lubuntu Logo
-    QPixmap logo("../img/logo.png");
-    int w = ui->logolabel->width();
-    int h = ui->logolabel->height();
-    ui->logolabel->setPixmap(logo.scaled (w,h,Qt::KeepAspectRatio));
+    // Set the button colors
+    ui->tryLubuntu->setStyleSheet("background-color: rgba(0, 104, 200, 100);");
+    ui->installLubuntu->setStyleSheet("background-color: rgba(0, 104, 200, 100);");
 }
 
 MainWindow::~MainWindow()
