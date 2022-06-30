@@ -1,3 +1,4 @@
+#include <QProcess>
 #include "installerprompt.h"
 #include "./ui_installerprompt.h"
 
@@ -23,11 +24,18 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
 
     // Slots and signals
     connect(ui->tryLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::tryLubuntu);
+    connect(ui->installLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::installLubuntu);
 }
 
 void InstallerPrompt::tryLubuntu()
 {
     QApplication::quit();
+}
+
+void InstallerPrompt::installLubuntu()
+{
+    QProcess *calamares = new QProcess(this);
+    calamares->start("/usr/bin/pkexec /usr/bin/calamares");
 }
 
 InstallerPrompt::~InstallerPrompt()

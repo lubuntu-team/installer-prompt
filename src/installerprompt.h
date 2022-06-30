@@ -17,6 +17,7 @@ public:
 
 public slots:
     void tryLubuntu();
+    void installLubuntu();
 
 private:
     Ui::InstallerPrompt *ui;
