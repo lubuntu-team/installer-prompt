@@ -2,5 +2,5 @@
 Exec=/usr/bin/lubuntu-installer-prompt
 Name=Lubuntu Installer Prompt
 Type=Application
-Version=0.2.0
+Version=0.3.0
 X-LXQt-Need-Tray=true

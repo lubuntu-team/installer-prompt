@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
 
-project(lubuntu-installer-prompt VERSION 0.2.0 LANGUAGES CXX)
+project(lubuntu-installer-prompt VERSION 0.3.0 LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
