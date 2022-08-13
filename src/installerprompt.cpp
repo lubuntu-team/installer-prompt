@@ -45,7 +45,7 @@ void InstallerPrompt::tryLubuntu()
 void InstallerPrompt::installLubuntu()
 {
     QProcess *calamares = new QProcess(this);
-    calamares->start("/usr/bin/lubuntu-installer");
+    calamares->start("/usr/libexec/lubuntu-installer");
 }
 
 InstallerPrompt::~InstallerPrompt()
