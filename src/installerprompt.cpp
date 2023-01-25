@@ -16,7 +16,7 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
 
     int height = screenGeometry.height();
     int width = screenGeometry.width();
-    bg = bg.scaled(width, height, Qt::KeepAspectRatio);
+    bg = bg.scaled(width, height, Qt::IgnoreAspectRatio);
 
     QPalette palette;
     palette.setBrush(QPalette::Window, bg);
