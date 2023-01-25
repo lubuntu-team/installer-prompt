@@ -31,6 +31,6 @@ target_link_libraries(lubuntu-installer-prompt PRIVATE Qt6::Widgets)
 qt_finalize_executable(lubuntu-installer-prompt)
 
 install(TARGETS lubuntu-installer-prompt DESTINATION bin)
-install(PROGRAMS "scripts/lubuntu-installer" DESTINATION bin)
+install(PROGRAMS "scripts/lubuntu-installer" DESTINATION libexec)
 install(FILES "img/background.png" DESTINATION share/lubuntu/installer-prompt)
 install(FILES "lubuntu-installer-prompt.desktop" DESTINATION /etc/xdg/xdg-Lubuntu/autostart)
