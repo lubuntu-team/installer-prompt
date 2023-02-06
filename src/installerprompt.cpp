@@ -46,6 +46,9 @@ void InstallerPrompt::installLubuntu()
 {
     QProcess *calamares = new QProcess(this);
     calamares->start("/usr/libexec/lubuntu-installer");
+
+    // If Calamares exits, it either crashed or the user cancelled the installation. Exit the installer prompt (and start LXQt).
+    connect(calamares, &QProcess::finished, this, &InstallerPrompt::tryLubuntu);
 }
 
 InstallerPrompt::~InstallerPrompt()
