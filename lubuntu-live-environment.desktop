@@ -1,0 +1,5 @@
+[Desktop Entry]
+Exec=/bin/start-lubuntu-live-env
+Name=Lubuntu Live Environment
+Comment=Starts the Lubuntu Live Environment
+Type=Application

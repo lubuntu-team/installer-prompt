@@ -32,5 +32,6 @@ qt_finalize_executable(lubuntu-installer-prompt)
 
 install(TARGETS lubuntu-installer-prompt DESTINATION bin)
 install(PROGRAMS "scripts/lubuntu-installer" DESTINATION libexec)
+install(PROGRAMS "scripts/start-lubuntu-live-env" DESTINATION bin)
 install(FILES "img/background.png" DESTINATION share/lubuntu/installer-prompt)
-install(FILES "lubuntu-installer-prompt.desktop" DESTINATION /etc/xdg/xdg-Lubuntu/autostart)
+install(FILES "lubuntu-live-environment.desktop" DESTINATION share/xsessions)
