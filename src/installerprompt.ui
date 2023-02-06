@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>680</width>
-    <height>420</height>
+    <width>2085</width>
+    <height>1303</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -36,11 +36,24 @@
      </rect>
     </property>
     <layout class="QVBoxLayout" name="mainLayout">
-     <property name="sizeConstraint">
-      <enum>QLayout::SetMaximumSize</enum>
-     </property>
      <item>
-      <layout class="QHBoxLayout" name="titleLayout" stretch="1,0,1">
+      <spacer name="verticalSpacer">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeType">
+        <enum>QSizePolicy::Expanding</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <layout class="QHBoxLayout" name="titleLayout" stretch="0,0,0">
        <property name="sizeConstraint">
         <enum>QLayout::SetMaximumSize</enum>
        </property>
@@ -59,16 +72,16 @@
        </item>
        <item>
         <widget class="QLabel" name="title">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
            <width>750</width>
            <height>64</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>128</width>
-           <height>128</height>
           </size>
          </property>
          <property name="baseSize">
@@ -80,17 +93,30 @@
          <property name="font">
           <font>
            <family>Ubuntu</family>
-           <pointsize>12</pointsize>
+           <pointsize>25</pointsize>
+           <italic>false</italic>
+           <bold>false</bold>
           </font>
          </property>
+         <property name="autoFillBackground">
+          <bool>false</bool>
+         </property>
          <property name="styleSheet">
-          <string notr="true">QLabel { color : white; font-family: Ubuntu;}</string>
+          <string notr="true">QLabel {
+	color : white;
+	font: 25pt &quot;Ubuntu&quot;;
+	background-color: rgba(0, 104, 200, 200);
+	border-radius: 15px;
+}</string>
          </property>
          <property name="text">
-          <string># Would you like to try or install Lubuntu?</string>
+          <string>Lubuntu - Welcome to the Next Universe</string>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
+         </property>
+         <property name="scaledContents">
+          <bool>false</bool>
          </property>
          <property name="alignment">
           <set>Qt::AlignCenter</set>
@@ -113,7 +139,7 @@
       </layout>
      </item>
      <item>
-      <spacer name="verticalSpacer">
+      <spacer name="verticalSpacer_7">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
@@ -141,10 +167,29 @@
         </spacer>
        </item>
        <item>
+        <spacer name="horizontalSpacer_5">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QPushButton" name="tryLubuntu">
          <property name="minimumSize">
           <size>
            <width>250</width>
+           <height>75</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
            <height>75</height>
           </size>
          </property>
@@ -154,11 +199,19 @@
            <pointsize>24</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Try Lubuntu without installing it on your system. Allows you to use programs, browse the Web, and even temporarily install apps without modifying your system. Changes made within the live environment will be lost when the computer shuts down.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
          <property name="autoFillBackground">
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true"/>
+          <string notr="true">QPushButton {
+	background-color: rgba(0, 104, 200, 100); color: white; border-radius: 15px;
+}
+QToolTip {
+	background-color: rgba(0, 104, 200, 100); color: white; border: 1px solid black;
+}</string>
          </property>
          <property name="text">
           <string>Try Lubuntu</string>
@@ -179,10 +232,45 @@
         </spacer>
        </item>
        <item>
+        <spacer name="titleStabilizer">
+         <property name="orientation">
+          <enum>Qt::Vertical</enum>
+         </property>
+         <property name="sizeType">
+          <enum>QSizePolicy::Fixed</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>20</width>
+           <height>80</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_4">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item>
         <widget class="QPushButton" name="installLubuntu">
          <property name="minimumSize">
           <size>
            <width>250</width>
+           <height>75</height>
+          </size>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16777215</width>
            <height>75</height>
           </size>
          </property>
@@ -192,10 +280,34 @@
            <pointsize>24</pointsize>
           </font>
          </property>
+         <property name="toolTip">
+          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Install Lubuntu onto your system. You can install Lubuntu by itself, or alongside an existing operating system.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         </property>
+         <property name="styleSheet">
+          <string notr="true">QPushButton {
+	background-color: rgba(0, 104, 200, 100); color: white; border-radius: 15px;
+}
+QToolTip {
+	background-color: rgba(0, 104, 200, 100); color: white; border: 1px solid black;
+}</string>
+         </property>
          <property name="text">
           <string>Install Lubuntu</string>
          </property>
         </widget>
+       </item>
+       <item>
+        <spacer name="horizontalSpacer_6">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
        </item>
        <item>
         <spacer name="horizontalSpacer_3">
@@ -213,7 +325,46 @@
       </layout>
      </item>
      <item>
+      <spacer name="verticalSpacer_6">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
       <spacer name="verticalSpacer_4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_8">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
+       </property>
+       <property name="sizeHint" stdset="0">
+        <size>
+         <width>20</width>
+         <height>40</height>
+        </size>
+       </property>
+      </spacer>
+     </item>
+     <item>
+      <spacer name="verticalSpacer_9">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>

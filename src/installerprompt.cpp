@@ -25,12 +25,9 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     // Resize the layout widget to the screen size.
     ui->gridLayoutWidget->resize(width, height);
 
-    // Set the button colors
-    QString css = "background-color: rgba(0, 104, 200, 100); color: white; border-radius: 15px;";
+    // Set the buttons to be translucent
     ui->tryLubuntu->setAttribute(Qt::WA_TranslucentBackground);
-    ui->tryLubuntu->setStyleSheet(css);
     ui->installLubuntu->setAttribute(Qt::WA_TranslucentBackground);
-    ui->installLubuntu->setStyleSheet(css);
 
     // Slots and signals
     connect(ui->tryLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::tryLubuntu);
@@ -44,6 +41,8 @@ void InstallerPrompt::tryLubuntu()
 
 void InstallerPrompt::installLubuntu()
 {
+    ui->tryLubuntu->setVisible(false);
+    ui->installLubuntu->setVisible(false);
     QProcess *calamares = new QProcess(this);
     calamares->start("/usr/libexec/lubuntu-installer");
 
