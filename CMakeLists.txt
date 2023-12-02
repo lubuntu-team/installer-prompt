@@ -11,7 +11,10 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt5 REQUIRED COMPONENTS Core Widgets)
+find_package(ECM REQUIRED NO_MODULE)
+set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
+find_package(Qt5 REQUIRED COMPONENTS Core Widgets Network)
+find_package(KF5 REQUIRED COMPONENTS NetworkManagerQt Notifications)
 
 include_directories(${PROJECT_SOURCE_DIR}/src)
 
@@ -23,7 +26,7 @@ file(GLOB PROJECT_SOURCES
 
 add_executable(lubuntu-installer-prompt ${PROJECT_SOURCES})
 
-target_link_libraries(lubuntu-installer-prompt Qt5::Widgets)
+target_link_libraries(lubuntu-installer-prompt Qt5::Widgets KF5::NetworkManagerQt KF5::Notifications)
 
 install(TARGETS lubuntu-installer-prompt DESTINATION bin)
 install(PROGRAMS "scripts/lubuntu-installer" DESTINATION libexec)
