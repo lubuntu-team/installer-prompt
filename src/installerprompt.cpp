@@ -152,27 +152,57 @@ void InstallerPrompt::refreshNetworkList() {
 }
 
 void InstallerPrompt::initLanguageComboBox() {
-    // This should populate the language combo box from the UI file, not create a new one
     QStringList languages = getAvailableLanguages();
-    ui->languageComboBox->addItems(languages);  // Add items to the combo box
+    ui->languageComboBox->addItems(languages);
 
-    int defaultIndex = ui->languageComboBox->findText(QLocale(QLocale::English, QLocale::UnitedStates).nativeLanguageName());
+    QString defaultLanguage = "English (United States)";
+    int defaultIndex = ui->languageComboBox->findText(defaultLanguage);
     if (defaultIndex != -1) {
         ui->languageComboBox->setCurrentIndex(defaultIndex);
     }
 }
 
 QStringList InstallerPrompt::getAvailableLanguages() const {
-    QStringList languageList;
-    for (int language = QLocale::Abkhazian; language <= QLocale::LastLanguage; ++language) {
-        QLocale locale(static_cast<QLocale::Language>(language));
-        QString languageName = locale.languageToString(locale.language());
-        if (!languageName.isEmpty() && !languageList.contains(languageName)) {
-            languageList.append(languageName);
+    QMap<QString, QString> languageMap; // Default sorting by QString is case-sensitive
+
+    auto sanitize = [](QString s) -> QString {
+        s.replace("St.", "Saint", Qt::CaseInsensitive);
+        s.replace("&", "and", Qt::CaseInsensitive);
+        return s;
+    };
+
+    for (int language = QLocale::C; language <= QLocale::LastLanguage; ++language) {
+        foreach (int country, QLocale::countriesForLanguage(static_cast<QLocale::Language>(language))) {
+            QLocale locale(static_cast<QLocale::Language>(language), static_cast<QLocale::Country>(country));
+            QString nativeName = locale.nativeLanguageName();
+            if (nativeName.isEmpty()) continue;
+
+            QString nativeCountryName = sanitize(locale.nativeCountryName());
+            QString englishLanguageName = QLocale::languageToString(locale.language());
+            QString englishCountryName = sanitize(QLocale::countryToString(locale.country()));
+
+            // Rename "American English" to "English"
+            if (locale.language() == QLocale::English) {
+                nativeName = "English";
+                englishLanguageName = "English";
+            }
+
+            QString displayName = nativeName + " (" + nativeCountryName + ")";
+            if (nativeName.compare(englishLanguageName, Qt::CaseInsensitive) != 0 &&
+                nativeCountryName.compare(englishCountryName, Qt::CaseInsensitive) != 0) {
+                displayName += " - " + englishLanguageName + " (" + englishCountryName + ")";
+            }
+
+            languageMap.insert(displayName, locale.name());
         }
     }
-    languageList.sort(Qt::CaseInsensitive);
-    return languageList;
+
+    QStringList sortedLanguages = languageMap.keys();
+    std::sort(sortedLanguages.begin(), sortedLanguages.end(), [](const QString &a, const QString &b) {
+        return a.compare(b, Qt::CaseInsensitive) < 0;
+    });
+
+    return sortedLanguages;
 }
 
 void InstallerPrompt::onLanguageChanged(int index) {
