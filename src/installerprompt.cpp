@@ -67,11 +67,11 @@ bool InstallerPrompt::checkInternetConnection() {
 
 void InstallerPrompt::updateConnectionStatus(bool online) {
     if (online) {
-        connectionStatusLabel->setText(tr("Connected to the internet"));
-        connectWifiButton->setVisible(false);
+        ui->connectionStatusLabel->setText(tr("Connected to the internet"));
+        ui->connectWifiButton->setVisible(false);
     } else {
-        connectionStatusLabel->setText(tr("Not connected to the internet"));
-        connectWifiButton->setVisible(true);
+        ui->connectionStatusLabel->setText(tr("Not connected to the internet"));
+        ui->connectWifiButton->setVisible(true);
     }
 }
 
