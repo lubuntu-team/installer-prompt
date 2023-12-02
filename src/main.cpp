@@ -5,22 +5,21 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    QList<InstallerPrompt*> windows;
+    QList<InstallerPrompt*> ws;
 
     // Iterate through all available screens
     for (QScreen *screen : QApplication::screens()) {
-        InstallerPrompt *window = new InstallerPrompt();
-        window->setGeometry(screen->geometry());
-        window->show();
-        windows.append(window);
+        InstallerPrompt *w = new InstallerPrompt();
+        w->setGeometry(screen->geometry());
+        w->show();
+        ws.append(w);
     }
 
-    // Connect signals and slots to synchronize state across windows
-    for (InstallerPrompt *window : windows) {
-        for (InstallerPrompt *otherWindow : windows) {
-            if (window != otherWindow) {
+    for (InstallerPrompt *w : ws) {
+        for (InstallerPrompt *otherWindow : ws) {
+            if (w != otherWindow) {
                 // Connect signals and slots for synchronization
-                // Example: connect(window, &InstallerPrompt::someSignal, otherWindow, &InstallerPrompt::someSlot);
+                // Example: connect(ws.last(), &InstallerPrompt::someSignal, otherWindow, &InstallerPrompt::someSlot);
             }
         }
     }

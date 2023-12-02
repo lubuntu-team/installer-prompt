@@ -6,6 +6,7 @@
 #include <QScreen>
 #include <QMessageBox>
 #include <QLineEdit>
+#include <QGraphicsDropShadowEffect>
 #include "installerprompt.h"
 #include "./ui_installerprompt.h"
 
@@ -15,7 +16,7 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     ui->setupUi(this);
 
     // Set the background image and scale it
-    QPixmap bg("/usr/share/lubuntu/installer-prompt/background.png");
+    QPixmap bg(":/background");
     if (bg.isNull()) {
         QMessageBox::warning(this, tr("Error"), tr("Background image cannot be loaded."));
         return;

@@ -1,0 +1,8 @@
+<RCC>
+    <qresource prefix="/">
+        <file alias="logo">../img/lubuntu-logo.png</file>
+        <file alias="background">../img/background.png</file>
+        <file alias="installer">../img/installer.png</file>
+        <file alias="symbol">../img/symbol.png</file>
+    </qresource>
+</RCC>

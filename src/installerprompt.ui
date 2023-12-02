@@ -21,13 +21,12 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
-    color: #000000; /* Set text color to black */
+    color: #000000;
 }
 
 QPushButton {
     background-color: rgba(30, 144, 255, 0.8);
     color: #ffffff;
-    border: 2px solid #ffffff;
     border-radius: 15px;
     padding: 10px 20px;
     margin: 10px;
@@ -53,7 +52,14 @@ QComboBox, QLineEdit {
 
 QLabel {
     qproperty-alignment: 'AlignCenter';
-}</string>
+    color: #ffffff;
+}
+
+QLabel#logoLabel {
+    image: url(:/logo);
+    background-color: transparent;
+}
+</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <property name="sizePolicy">
@@ -107,7 +113,7 @@ QLabel {
         </spacer>
        </item>
        <item>
-        <widget class="QLabel" name="title">
+        <widget class="QLabel" name="logoLabel">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
            <horstretch>0</horstretch>
@@ -117,7 +123,7 @@ QLabel {
          <property name="minimumSize">
           <size>
            <width>750</width>
-           <height>64</height>
+           <height>100</height>
           </size>
          </property>
          <property name="baseSize">
@@ -129,7 +135,6 @@ QLabel {
          <property name="font">
           <font>
            <family>Ubuntu</family>
-           <pointsize>25</pointsize>
            <weight>50</weight>
            <italic>false</italic>
            <bold>false</bold>
@@ -139,15 +144,10 @@ QLabel {
           <bool>false</bool>
          </property>
          <property name="styleSheet">
-          <string notr="true">QLabel {
-	color : white;
-	font: 25pt &quot;Ubuntu&quot;;
-	background-color: rgba(0, 104, 200, 200);
-	border-radius: 15px;
-}</string>
+          <string notr="true"/>
          </property>
          <property name="text">
-          <string>Lubuntu - Welcome to the Next Universe</string>
+          <string/>
          </property>
          <property name="textFormat">
           <enum>Qt::MarkdownText</enum>
@@ -207,7 +207,7 @@ QLabel {
         <widget class="QLabel" name="label">
          <property name="font">
           <font>
-           <pointsize>20</pointsize>
+           <pointsize>14</pointsize>
            <weight>75</weight>
            <bold>true</bold>
           </font>
@@ -221,7 +221,7 @@ QLabel {
         <widget class="QComboBox" name="languageComboBox">
          <property name="minimumSize">
           <size>
-           <width>400</width>
+           <width>352</width>
            <height>50</height>
           </size>
          </property>
@@ -280,13 +280,13 @@ QLabel {
         <widget class="QLabel" name="label_2">
          <property name="font">
           <font>
-           <pointsize>20</pointsize>
+           <pointsize>14</pointsize>
            <weight>75</weight>
            <bold>true</bold>
           </font>
          </property>
          <property name="text">
-          <string>Select a WiFi Network:</string>
+          <string>Select a Wi-Fi Network:</string>
          </property>
         </widget>
        </item>
@@ -294,7 +294,7 @@ QLabel {
         <widget class="QComboBox" name="networkComboBox">
          <property name="minimumSize">
           <size>
-           <width>400</width>
+           <width>352</width>
            <height>50</height>
           </size>
          </property>
@@ -311,18 +311,17 @@ QLabel {
          <property name="minimumSize">
           <size>
            <width>100</width>
-           <height>50</height>
+           <height>65</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>50</height>
+           <height>65</height>
           </size>
          </property>
          <property name="font">
           <font>
-           <pointsize>14</pointsize>
            <weight>75</weight>
            <bold>true</bold>
           </font>
@@ -366,7 +365,6 @@ QLabel {
         <widget class="QLabel" name="label_3">
          <property name="font">
           <font>
-           <pointsize>14</pointsize>
            <weight>75</weight>
            <bold>true</bold>
           </font>
@@ -449,20 +447,22 @@ QLabel {
         <widget class="QPushButton" name="tryLubuntu">
          <property name="minimumSize">
           <size>
-           <width>250</width>
-           <height>75</height>
+           <width>300</width>
+           <height>125</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>75</height>
+           <height>125</height>
           </size>
          </property>
          <property name="font">
           <font>
            <family>Ubuntu</family>
            <pointsize>24</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="toolTip">
@@ -480,7 +480,17 @@ QToolTip {
 }</string>
          </property>
          <property name="text">
-          <string>Try Lubuntu</string>
+          <string>  Try Lubuntu</string>
+         </property>
+         <property name="icon">
+          <iconset resource="resource.qrc">
+           <normaloff>:/symbol</normaloff>:/symbol</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>64</width>
+           <height>64</height>
+          </size>
          </property>
         </widget>
        </item>
@@ -514,20 +524,22 @@ QToolTip {
         <widget class="QPushButton" name="installLubuntu">
          <property name="minimumSize">
           <size>
-           <width>250</width>
-           <height>75</height>
+           <width>300</width>
+           <height>125</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>75</height>
+           <height>125</height>
           </size>
          </property>
          <property name="font">
           <font>
            <family>Ubuntu</family>
            <pointsize>24</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="toolTip">
@@ -542,7 +554,17 @@ QToolTip {
 }</string>
          </property>
          <property name="text">
-          <string>Install Lubuntu</string>
+          <string>  Install Lubuntu</string>
+         </property>
+         <property name="icon">
+          <iconset resource="resource.qrc">
+           <normaloff>:/installer</normaloff>:/installer</iconset>
+         </property>
+         <property name="iconSize">
+          <size>
+           <width>64</width>
+           <height>64</height>
+          </size>
          </property>
         </widget>
        </item>
@@ -658,7 +680,9 @@ QToolTip {
         <widget class="QLabel" name="connectionStatusLabel">
          <property name="font">
           <font>
-           <pointsize>16</pointsize>
+           <pointsize>18</pointsize>
+           <weight>75</weight>
+           <bold>true</bold>
           </font>
          </property>
          <property name="text">
@@ -699,6 +723,8 @@ QToolTip {
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="resource.qrc"/>
+ </resources>
  <connections/>
 </ui>
