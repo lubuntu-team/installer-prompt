@@ -44,36 +44,42 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     initLanguageComboBox();
 
     // Check initial network status and update UI
-    updateConnectionStatus(checkInternetConnection());
+    updateConnectionStatus();
 
     // Set up network manager signals for dynamic updates
     auto nm = NetworkManager::notifier();
-    connect(nm, &NetworkManager::Notifier::deviceAdded, this, &InstallerPrompt::refreshNetworkList);
-    connect(nm, &NetworkManager::Notifier::deviceRemoved, this, &InstallerPrompt::refreshNetworkList);
-    connect(nm, &NetworkManager::Notifier::networkingEnabledChanged, this, &InstallerPrompt::refreshNetworkList);
+    connect(nm, &NetworkManager::Notifier::deviceAdded, this, &InstallerPrompt::updateConnectionStatus);
+    connect(nm, &NetworkManager::Notifier::deviceRemoved, this, &InstallerPrompt::updateConnectionStatus);
+    connect(nm, &NetworkManager::Notifier::activeConnectionsChanged, this, &InstallerPrompt::updateConnectionStatus);
+    connect(nm, &NetworkManager::Notifier::wirelessEnabledChanged, this, &InstallerPrompt::updateConnectionStatus);
+    connect(nm, &NetworkManager::Notifier::activeConnectionAdded, this, &InstallerPrompt::updateConnectionStatus);
+    connect(nm, &NetworkManager::Notifier::connectivityChanged, this, &InstallerPrompt::updateConnectionStatus);
+    connect(nm, &NetworkManager::Notifier::primaryConnectionChanged, this, &InstallerPrompt::updateConnectionStatus);
 }
 
 bool InstallerPrompt::checkInternetConnection() {
-    for (const NetworkManager::Device::Ptr &device : NetworkManager::networkInterfaces()) {
-        if (device->type() == NetworkManager::Device::Wifi) {
-            auto wifiDevice = device.staticCast<NetworkManager::WirelessDevice>();
-            if (!wifiDevice->isActive()) {
-                showWifiOptions();
-            }
-            return wifiDevice->isActive();
-        }
-    }
-    return false;
+    return NetworkManager::status() == NetworkManager::Status::Connected;
 }
 
-void InstallerPrompt::updateConnectionStatus(bool online) {
-    if (online) {
-        ui->connectionStatusLabel->setText(tr("Connected to the internet"));
-        ui->connectWifiButton->setVisible(false);
-    } else {
-        ui->connectionStatusLabel->setText(tr("Not connected to the internet"));
-        ui->connectWifiButton->setVisible(true);
+void InstallerPrompt::updateConnectionStatus() {
+    bool online = checkInternetConnection();
+    
+    const auto devices = NetworkManager::networkInterfaces();
+    bool wifiEnabled = false;
+    if (NetworkManager::isNetworkingEnabled()) {
+      for (const auto &device : devices) {
+          if (device->type() == NetworkManager::Device::Wifi && NetworkManager::isWirelessEnabled()) wifiEnabled = true;
+      }
     }
+
+    bool connectable = !online && wifiEnabled;
+    if (connectable) refreshNetworkList();
+
+    ui->connectionStatusLabel->setText(online ? tr("Connected to the internet") : tr("Not connected to the internet"));
+    ui->connectWiFiButton->setVisible(connectable);
+    ui->WiFiLabel->setVisible(connectable);
+    ui->networkComboBox->setVisible(connectable);
+    ui->WiFiInfoLabel->setVisible(connectable);
 }
 
 void InstallerPrompt::onConnectWifiClicked() {
@@ -135,7 +141,7 @@ void InstallerPrompt::refreshNetworkList() {
     if (!wirelessDevice) {
         // No wireless device found, handle appropriately
         ui->networkComboBox->setVisible(false);
-        connectWifiButton->setVisible(false);
+        ui->connectWiFiButton->setVisible(false);
         return;
     }
 
@@ -148,7 +154,7 @@ void InstallerPrompt::refreshNetworkList() {
 
     // Adjust visibility based on whether any networks are found
     ui->networkComboBox->setVisible(!networks.isEmpty());
-    connectWifiButton->setVisible(!networks.isEmpty());
+    ui->connectWiFiButton->setVisible(!networks.isEmpty());
 }
 
 void InstallerPrompt::initLanguageComboBox() {

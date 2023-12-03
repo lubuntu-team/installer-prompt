@@ -34,14 +34,12 @@ private slots:
 private:
     Ui::InstallerPrompt *ui;
     QProcess *process;
-    QPushButton *connectWifiButton;
-    QLabel *connectionStatusLabel;
 
     void initLanguageComboBox();
     QStringList getAvailableLanguages() const;
     bool checkInternetConnection();
     void showWifiOptions();
-    void updateConnectionStatus(bool online);
+    void updateConnectionStatus();
 };
 
 #endif // INSTALLERPROMPT_H
