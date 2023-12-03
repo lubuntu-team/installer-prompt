@@ -57,12 +57,29 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     connect(nm, &NetworkManager::Notifier::primaryConnectionChanged, this, &InstallerPrompt::updateConnectionStatus);
 }
 
-bool InstallerPrompt::checkInternetConnection() {
-    return NetworkManager::status() == NetworkManager::Status::Connected;
-}
-
 void InstallerPrompt::updateConnectionStatus() {
-    bool online = checkInternetConnection();
+    auto status = NetworkManager::status();
+    bool online = false;
+    QString statusIndicator;
+
+    switch (status) {
+        case NetworkManager::Status::Disconnected:
+            statusIndicator = "<span style=\"color: red;\">❌ Not Connected</span>";
+            break;
+        case NetworkManager::Status::Connected:
+            online = true;
+            statusIndicator = "<span style=\"color: green;\">🟢 Connected</span>";
+            break;
+        case NetworkManager::Status::Connecting:
+            statusIndicator = "<span style=\"color: yellow;\">🟡 Connecting...</span>";
+            break;
+        case NetworkManager::Status::Disconnecting:
+            statusIndicator = "<span style=\"color: yellow;\">🟡 Disconnecting...</span>";
+            break;
+        default:
+            statusIndicator = "<span style=\"color: grey;\">⚪ Unknown Status</span>";
+    }
+    ui->connectionStatusLabel->setText(statusIndicator);
     
     const auto devices = NetworkManager::networkInterfaces();
     bool wifiEnabled = false;
@@ -75,7 +92,6 @@ void InstallerPrompt::updateConnectionStatus() {
     bool connectable = !online && wifiEnabled;
     if (connectable) refreshNetworkList();
 
-    ui->connectionStatusLabel->setText(online ? tr("Connected to the internet") : tr("Not connected to the internet"));
     ui->connectWiFiButton->setVisible(connectable);
     ui->WiFiLabel->setVisible(connectable);
     ui->networkComboBox->setVisible(connectable);

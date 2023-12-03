@@ -37,7 +37,6 @@ private:
 
     void initLanguageComboBox();
     QStringList getAvailableLanguages() const;
-    bool checkInternetConnection();
     void showWifiOptions();
     void updateConnectionStatus();
 };
