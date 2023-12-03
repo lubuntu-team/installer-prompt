@@ -60,27 +60,32 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
 void InstallerPrompt::updateConnectionStatus() {
     auto status = NetworkManager::status();
     bool online = false;
-    QString statusIndicator;
+    QString statusText, statusIndicator;
 
     switch (status) {
         case NetworkManager::Status::Disconnected:
-            statusIndicator = "<span style=\"color: red;\">❌ Not Connected</span>";
+            statusText = tr("Not Connected");
+            statusIndicator = "<span style=\"color: red;\">❌</span> " + statusText;
             break;
         case NetworkManager::Status::Connected:
             online = true;
-            statusIndicator = "<span style=\"color: green;\">🟢 Connected</span>";
+            statusText = tr("Connected");
+            statusIndicator = "<span style=\"color: green;\">🟢</span> " + statusText;
             break;
         case NetworkManager::Status::Connecting:
-            statusIndicator = "<span style=\"color: yellow;\">🟡 Connecting...</span>";
+            statusText = tr("Connecting...");
+            statusIndicator = "<span style=\"color: yellow;\">🟡</span> " + statusText;
             break;
         case NetworkManager::Status::Disconnecting:
-            statusIndicator = "<span style=\"color: yellow;\">🟡 Disconnecting...</span>";
+            statusText = tr("Disconnecting...");
+            statusIndicator = "<span style=\"color: yellow;\">🟡</span> " + statusText;
             break;
         default:
-            statusIndicator = "<span style=\"color: grey;\">⚪ Unknown Status</span>";
+            statusText = tr("Unknown Status");
+            statusIndicator = "<span style=\"color: grey;\">⚪</span> " + statusText;
     }
-    ui->connectionStatusLabel->setText(statusIndicator);
-    
+    ui->connectionStatusLabel->setText(statusIndicator);   
+ 
     const auto devices = NetworkManager::networkInterfaces();
     bool wifiEnabled = false;
     if (NetworkManager::isNetworkingEnabled()) {
