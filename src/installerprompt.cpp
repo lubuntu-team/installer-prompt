@@ -37,9 +37,6 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     palette.setBrush(QPalette::Window, bg);
     this->setPalette(palette);
 
-    // Resize the layout widget to the screen size
-    ui->gridLayoutWidget->resize(screenGeometry.size());
-
     // Initialize process for external app launch
     process = new QProcess(this);
 
@@ -58,6 +55,7 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     foreach (const NetworkManager::Device::Ptr &device, NetworkManager::networkInterfaces()) {
         if (device->type() == NetworkManager::Device::Wifi) {
             wifiDevice = device.objectCast<NetworkManager::WirelessDevice>();
+            connect(wifiDevice.data(), &NetworkManager::Device::stateChanged, this, [this]{updateConnectionStatus();});
             break;
         }
     }
@@ -183,6 +181,7 @@ void InstallerPrompt::handleWifiConnection(const QString &ssid) {
 
             // Update the connection settings
             qDebug() << "Saving the connection...";
+            QDBusObjectPath path;
             NetworkManager::ConnectionSettings::Ptr newConnectionSettings(new NetworkManager::ConnectionSettings(NetworkManager::ConnectionSettings::Wireless));
             newConnectionSettings->fromMap(nmMap);
             QDBusPendingReply<QDBusObjectPath> addreply = NetworkManager::addConnection(nmMap);
@@ -190,26 +189,25 @@ void InstallerPrompt::handleWifiConnection(const QString &ssid) {
             if (addreply.isError()) {
                 qDebug() << nmMap;
                 qDebug() << "Unable to save the connection:" << addreply.error().message();
-                return;
+            } else {
+                path = addreply.value();
+                qDebug() << "Added connection path:" << path.path();
             }
 
-            QString uuid = fullSettings.value("connection").toMap().value("uuid").toString();
-            NetworkManager::Connection::Ptr connection = NetworkManager::findConnectionByUuid(uuid);
+            NetworkManager::Connection::Ptr connection = NetworkManager::findConnection(path.path());
             if (!connection) {
                 qDebug() << "Unable to retrieve the connection after saving:" << addreply.error().message();
-                return;
             }
 
             QDBusPendingReply<QDBusObjectPath> reply = NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
             reply.waitForFinished();
             if (reply.isError()) {
                 qDebug() << "Unable to activate the connection:" << addreply.error().message();
+            } else {
+                NetworkManager::reloadConnections();
+                qDebug() << "Successfully connected:" << ssid;
                 return;
             }
-
-            NetworkManager::reloadConnections();
-            qDebug() << "Successfully connected:" << ssid;
-            return;
         }
 
         label.setStyleSheet("color: red;");

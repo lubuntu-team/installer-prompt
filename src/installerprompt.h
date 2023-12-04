@@ -30,6 +30,7 @@ private slots:
     void refreshNetworkList();
     void onLanguageChanged(int index);
     void onConnectWifiClicked();
+    void updateConnectionStatus();
     void tryLubuntu();
     void installLubuntu();
 
@@ -43,7 +44,6 @@ private:
     void initLanguageComboBox();
     QStringList getAvailableLanguages() const;
     void showWifiOptions();
-    void updateConnectionStatus();
     NetworkManager::Connection::Ptr findConnectionBySsid(const QString &ssid);
     QMap<QString, QVariant> createSettingsBySSID(const QString &ssid);
 };
