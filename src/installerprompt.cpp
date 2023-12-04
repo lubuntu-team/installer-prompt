@@ -1,12 +1,19 @@
+#include <NetworkManagerQt/ConnectionSettings>
 #include <NetworkManagerQt/Manager>
 #include <NetworkManagerQt/Device>
+#include <NetworkManagerQt/Ipv4Setting>
+#include <NetworkManagerQt/Ipv6Setting>
 #include <NetworkManagerQt/WirelessDevice>
 #include <NetworkManagerQt/WirelessNetwork>
+#include <NetworkManagerQt/WirelessSecuritySetting>
+#include <NetworkManagerQt/WirelessSetting>
+#include <NetworkManagerQt/Settings>
 #include <QProcess>
 #include <QScreen>
 #include <QMessageBox>
+#include <QUuid>
 #include <QLineEdit>
-#include <QGraphicsDropShadowEffect>
+#include <QDBusPendingReply>
 #include "installerprompt.h"
 #include "./ui_installerprompt.h"
 
@@ -39,12 +46,21 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     // Set up signal-slot connections for buttons
     connect(ui->tryLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::tryLubuntu);
     connect(ui->installLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::installLubuntu);
+    connect(ui->connectWiFiButton, &QAbstractButton::clicked, this, &InstallerPrompt::onConnectWifiClicked);
 
     // Set up the language combo box with available languages
     initLanguageComboBox();
 
     // Check initial network status and update UI
     updateConnectionStatus();
+
+    // Find and store the Wi-Fi device
+    foreach (const NetworkManager::Device::Ptr &device, NetworkManager::networkInterfaces()) {
+        if (device->type() == NetworkManager::Device::Wifi) {
+            wifiDevice = device.objectCast<NetworkManager::WirelessDevice>();
+            break;
+        }
+    }
 
     // Set up network manager signals for dynamic updates
     auto nm = NetworkManager::notifier();
@@ -101,31 +117,144 @@ void InstallerPrompt::updateConnectionStatus() {
     ui->WiFiLabel->setVisible(connectable);
     ui->networkComboBox->setVisible(connectable);
     ui->WiFiInfoLabel->setVisible(connectable);
+    ui->WiFiSpacer->changeSize(connectable ? 40 : 0, connectable ? 20 : 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+}
+
+void InstallerPrompt::handleWifiConnection(const QString &ssid) {
+    qDebug() << "Attempting to find connection for SSID:" << ssid;
+    foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
+        if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
+            auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
+            if (wirelessSetting && wirelessSetting->ssid() == ssid) {
+                qDebug() << "Attempting to use existing connection:" << ssid;
+                NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
+                qDebug() << "Successfully connected:" << ssid;
+                return;
+            }
+        }
+    }
+
+    QMap<QString, QVariant> fullSettings = createSettingsBySSID(ssid);
+    NMVariantMapMap nmMap;
+
+    for (const auto &key : fullSettings.keys()) {
+        nmMap[key] = fullSettings[key].toMap();
+    }
+
+    NetworkManager::ConnectionSettings::Ptr newConnectionSettings(new NetworkManager::ConnectionSettings(NetworkManager::ConnectionSettings::Wireless));
+    newConnectionSettings->fromMap(nmMap);
+    QVariantMap wirelessSecurity = fullSettings.value("802-11-wireless-security").toMap();
+
+    //bool isOpenNetwork = wirelessSecurity.isEmpty() || wirelessSecurity.value("key-mgmt").toString().isEmpty();
+    //if (isOpenNetwork && wifiDevice && wifiDevice->isValid() && connection) {
+    //    qDebug() << "Attempting to connect to open network: " << ssid;
+    //    NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
+    //    return;
+    //}
+
+    // If the network is secured, display the password dialog
+    QDialog passwordDialog(this);
+    QVBoxLayout layout(&passwordDialog);
+    QLabel label(tr("Enter Wi-Fi Password for %1:").arg(ssid), &passwordDialog);
+    QLineEdit lineEdit(&passwordDialog);
+    QPushButton button(tr("Connect"), &passwordDialog);
+
+    lineEdit.setEchoMode(QLineEdit::Password);
+    layout.addWidget(&label);
+    layout.addWidget(&lineEdit);
+    layout.addWidget(&button);
+
+    connect(&button, &QPushButton::clicked, &passwordDialog, &QDialog::accept);
+
+    for (int attempts = 0; attempts < 3; ++attempts) {
+        if (passwordDialog.exec() == QDialog::Rejected) return;
+        QString password = lineEdit.text();
+        if (wifiDevice && wifiDevice->isValid()) {
+            // Update the wireless security settings in the map
+            wirelessSecurity["key-mgmt"] = "wpa-psk";
+            wirelessSecurity["psk"] = password;
+            fullSettings["802-11-wireless-security"] = wirelessSecurity;
+
+            // Convert QMap<QString, QVariant> to NMVariantMapMap
+            NMVariantMapMap nmMap;
+            for (const auto &key : fullSettings.keys()) {
+                nmMap[key] = fullSettings[key].toMap();
+            }
+
+            // Update the connection settings
+            qDebug() << "Saving the connection...";
+            NetworkManager::ConnectionSettings::Ptr newConnectionSettings(new NetworkManager::ConnectionSettings(NetworkManager::ConnectionSettings::Wireless));
+            newConnectionSettings->fromMap(nmMap);
+            QDBusPendingReply<QDBusObjectPath> addreply = NetworkManager::addConnection(nmMap);
+            addreply.waitForFinished();
+            if (addreply.isError()) {
+                qDebug() << nmMap;
+                qDebug() << "Unable to save the connection:" << addreply.error().message();
+                return;
+            }
+
+            QString uuid = fullSettings.value("connection").toMap().value("uuid").toString();
+            NetworkManager::Connection::Ptr connection = NetworkManager::findConnectionByUuid(uuid);
+            if (!connection) {
+                qDebug() << "Unable to retrieve the connection after saving:" << addreply.error().message();
+                return;
+            }
+
+            QDBusPendingReply<QDBusObjectPath> reply = NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
+            reply.waitForFinished();
+            if (reply.isError()) {
+                qDebug() << "Unable to activate the connection:" << addreply.error().message();
+                return;
+            }
+
+            NetworkManager::reloadConnections();
+            qDebug() << "Successfully connected:" << ssid;
+            return;
+        }
+
+        label.setStyleSheet("color: red;");
+        label.setText(tr("Incorrect password. Please try again:"));
+    }
+
+    QMessageBox::warning(this, tr("Connection Failed"), tr("Unable to connect to the network."));
+}
+
+QMap<QString, QVariant> InstallerPrompt::createSettingsBySSID(const QString &ssid) {
+    // Create new connection settings
+    NetworkManager::ConnectionSettings::Ptr newConnectionSettings(new NetworkManager::ConnectionSettings(NetworkManager::ConnectionSettings::Wireless));
+    newConnectionSettings->setId(ssid);
+    newConnectionSettings->setUuid(NetworkManager::ConnectionSettings::createNewUuid());
+
+    // Set interface name from wifiDevice
+    if (wifiDevice) {
+        newConnectionSettings->setInterfaceName(wifiDevice->interfaceName());
+    } else {
+        qWarning() << "Wi-Fi device not found. Unable to set interface name.";
+        return QMap<QString, QVariant>();
+    }
+
+    // Configure wireless settings
+    QVariantMap wirelessSetting;
+    wirelessSetting.insert("ssid", ssid.toUtf8());
+
+    // Configure wireless security settings
+    NetworkManager::WirelessSecuritySetting::Ptr wirelessSecuritySetting = newConnectionSettings->setting(NetworkManager::Setting::WirelessSecurity).staticCast<NetworkManager::WirelessSecuritySetting>();
+    wirelessSecuritySetting->setKeyMgmt(NetworkManager::WirelessSecuritySetting::WpaPsk);
+
+    // Convert settings to QVariantMap
+    QMap<QString, QVariant> convertedSettings;
+    const auto settingsMap = newConnectionSettings->toMap();
+    for (const auto &key : settingsMap.keys()) {
+        convertedSettings[key] = QVariant::fromValue(settingsMap[key]);
+    }
+    convertedSettings.insert("802-11-wireless", wirelessSetting);
+
+    return convertedSettings;
 }
 
 void InstallerPrompt::onConnectWifiClicked() {
-    QDialog *passwordDialog = new QDialog(this, Qt::Window | Qt::WindowStaysOnTopHint);
-    QVBoxLayout *layout = new QVBoxLayout(passwordDialog);
-    
-    QLabel *label = new QLabel(tr("Enter Wi-Fi Password:"), passwordDialog);
-    QLineEdit *lineEdit = new QLineEdit(passwordDialog);
-    lineEdit->setEchoMode(QLineEdit::Password);
-    QPushButton *button = new QPushButton(tr("Connect"), passwordDialog);
-    
-    layout->addWidget(label);
-    layout->addWidget(lineEdit);
-    layout->addWidget(button);
-    
-    passwordDialog->setLayout(layout);
-    
-    connect(button, &QPushButton::clicked, this, [this, lineEdit, passwordDialog]() {
-        QString password = lineEdit->text();
-        // Use the password to connect to the selected Wi-Fi network
-        // Make sure to handle the password securely and do not store it in plain text
-        passwordDialog->accept();
-    });
-    
-    passwordDialog->exec();
+    QString selectedSSID = ui->networkComboBox->currentText();
+    handleWifiConnection(selectedSSID);
 }
 
 void InstallerPrompt::showWifiOptions() {
@@ -166,14 +295,22 @@ void InstallerPrompt::refreshNetworkList() {
         return;
     }
 
-    // Get the list of available networks
+    QMap<QString, NetworkManager::WirelessNetwork::Ptr> tempWifiNetworkMap;
+    QStringList ssidList;
+
     const auto networks = wirelessDevice->networks();
-    ui->networkComboBox->clear();
     for (const auto &network : networks) {
-        ui->networkComboBox->addItem(network->ssid());
+        QString ssid = network->ssid();
+        tempWifiNetworkMap[ssid] = network;
+        ssidList.append(ssid);
     }
 
-    // Adjust visibility based on whether any networks are found
+    // Update the main map and combo box only after the new list is ready
+    wifiNetworkMap.swap(tempWifiNetworkMap);
+    ui->networkComboBox->clear();
+    ui->networkComboBox->addItems(ssidList);
+
+    // Adjust visibility
     ui->networkComboBox->setVisible(!networks.isEmpty());
     ui->connectWiFiButton->setVisible(!networks.isEmpty());
 }

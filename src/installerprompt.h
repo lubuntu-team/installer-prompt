@@ -7,6 +7,9 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QDialog>
+#include <NetworkManagerQt/Device>
+#include <NetworkManagerQt/WirelessDevice>
+#include <NetworkManagerQt/WirelessNetwork>
 
 namespace NetworkManager {
     class Device;
@@ -16,8 +19,7 @@ namespace NetworkManager {
 
 namespace Ui { class InstallerPrompt; }
 
-class InstallerPrompt : public QMainWindow
-{
+class InstallerPrompt : public QMainWindow {
     Q_OBJECT
 
 public:
@@ -25,7 +27,7 @@ public:
     ~InstallerPrompt() override;
 
 private slots:
-    void refreshNetworkList(); // Slot to handle network list refreshes
+    void refreshNetworkList();
     void onLanguageChanged(int index);
     void onConnectWifiClicked();
     void tryLubuntu();
@@ -34,11 +36,16 @@ private slots:
 private:
     Ui::InstallerPrompt *ui;
     QProcess *process;
+    NetworkManager::WirelessDevice::Ptr wifiDevice;
+    QMap<QString, NetworkManager::WirelessNetwork::Ptr> wifiNetworkMap;
 
+    void handleWifiConnection(const QString &ssid);
     void initLanguageComboBox();
     QStringList getAvailableLanguages() const;
     void showWifiOptions();
     void updateConnectionStatus();
+    NetworkManager::Connection::Ptr findConnectionBySsid(const QString &ssid);
+    QMap<QString, QVariant> createSettingsBySSID(const QString &ssid);
 };
 
 #endif // INSTALLERPROMPT_H
