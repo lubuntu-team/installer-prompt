@@ -1,10 +1,22 @@
 #include "installerprompt.h"
 #include <QApplication>
 #include <QScreen>
+#include <QTranslator>
 
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
+
+    QTranslator translator;
+    const QStringList uiLanguages = QLocale::system().uiLanguages();
+    for (const QString &locale : uiLanguages) {
+        const QString baseName = QLocale(locale).name();
+        if (translator.load(":/i18n/" + baseName)) {
+            app.installTranslator(&translator);
+            break;
+        }
+    }
+
     QList<InstallerPrompt*> ws;
 
     // Iterate through all available screens
