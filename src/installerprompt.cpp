@@ -55,7 +55,7 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     foreach (const NetworkManager::Device::Ptr &device, NetworkManager::networkInterfaces()) {
         if (device->type() == NetworkManager::Device::Wifi) {
             wifiDevice = device.objectCast<NetworkManager::WirelessDevice>();
-            connect(wifiDevice.data(), &NetworkManager::Device::stateChanged, this, [this]{updateConnectionStatus();});
+            connect(wifiDevice.data(), &NetworkManager::Device::stateChanged, this, &InstallerPrompt::handleWiFiConnectionChange);
             break;
         }
     }
@@ -118,16 +118,37 @@ void InstallerPrompt::updateConnectionStatus() {
     ui->WiFiSpacer->changeSize(connectable ? 40 : 0, connectable ? 20 : 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
 }
 
-void InstallerPrompt::handleWifiConnection(const QString &ssid) {
+void InstallerPrompt::handleWiFiConnectionChange(NetworkManager::Device::State newstate, NetworkManager::Device::State oldstate, NetworkManager::Device::StateChangeReason reason)
+{
+    if (reason == NetworkManager::Device::NoSecretsReason) {
+        foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
+            if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
+                auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
+                if (wirelessSetting && wirelessSetting->ssid() == ui->networkComboBox->currentText()) {
+                    qDebug() << "Wiping connection with wrong password: " << ui->networkComboBox->currentText();
+                    QDBusPendingReply removeReply = connection->remove();
+                    removeReply.waitForFinished();
+                    handleWifiConnection(ui->networkComboBox->currentText(), true);
+                }
+            }
+        }
+    }
+}
+
+void InstallerPrompt::handleWifiConnection(const QString &ssid, bool recoverFromWrongPassword) {
+    ui->networkComboBox->setEnabled(false);
     qDebug() << "Attempting to find connection for SSID:" << ssid;
-    foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
-        if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
-            auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
-            if (wirelessSetting && wirelessSetting->ssid() == ssid) {
-                qDebug() << "Attempting to use existing connection:" << ssid;
-                NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
-                qDebug() << "Successfully connected:" << ssid;
-                return;
+    if (!recoverFromWrongPassword) {
+        foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
+            if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
+                auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
+                if (wirelessSetting && wirelessSetting->ssid() == ssid) {
+                    qDebug() << "Attempting to use existing connection:" << ssid;
+                    NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
+                    qDebug() << "Successfully connected:" << ssid;
+                    ui->networkComboBox->setEnabled(true);
+                    return;
+                }
             }
         }
     }
@@ -153,7 +174,14 @@ void InstallerPrompt::handleWifiConnection(const QString &ssid) {
     // If the network is secured, display the password dialog
     QDialog passwordDialog(this);
     QVBoxLayout layout(&passwordDialog);
-    QLabel label(tr("Enter Wi-Fi Password for %1:").arg(ssid), &passwordDialog);
+    QLabel label(&passwordDialog);
+    if (!recoverFromWrongPassword) {
+        label.setText(tr("Enter Wi-Fi Password for %1:").arg(ssid));
+        label.setStyleSheet("color: black");
+    } else {
+        label.setText(tr("Wrong Wi-Fi password for %1. Try again:").arg(ssid));
+        label.setStyleSheet("color: red");
+    }
     QLineEdit lineEdit(&passwordDialog);
     QPushButton button(tr("Connect"), &passwordDialog);
 
@@ -165,7 +193,10 @@ void InstallerPrompt::handleWifiConnection(const QString &ssid) {
     connect(&button, &QPushButton::clicked, &passwordDialog, &QDialog::accept);
 
     for (int attempts = 0; attempts < 3; ++attempts) {
-        if (passwordDialog.exec() == QDialog::Rejected) return;
+        if (passwordDialog.exec() == QDialog::Rejected) {
+            ui->networkComboBox->setEnabled(true);
+            return;
+        }
         QString password = lineEdit.text();
         if (wifiDevice && wifiDevice->isValid()) {
             // Update the wireless security settings in the map
@@ -203,18 +234,17 @@ void InstallerPrompt::handleWifiConnection(const QString &ssid) {
             reply.waitForFinished();
             if (reply.isError()) {
                 qDebug() << "Unable to activate the connection:" << addreply.error().message();
+                QMessageBox::warning(this, tr("Connection Failed"), tr("Unable to connect to the network."));
+                ui->networkComboBox->setEnabled(true);
+                return;
             } else {
                 NetworkManager::reloadConnections();
                 qDebug() << "Successfully connected:" << ssid;
+                // ui->networkComboBox->setEnabled(true); !!! We don't run this here since we actually *want* the box to remain locked right now
                 return;
             }
         }
-
-        label.setStyleSheet("color: red;");
-        label.setText(tr("Incorrect password. Please try again:"));
     }
-
-    QMessageBox::warning(this, tr("Connection Failed"), tr("Unable to connect to the network."));
 }
 
 QMap<QString, QVariant> InstallerPrompt::createSettingsBySSID(const QString &ssid) {

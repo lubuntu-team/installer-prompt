@@ -31,6 +31,7 @@ private slots:
     void onLanguageChanged(int index);
     void onConnectWifiClicked();
     void updateConnectionStatus();
+    void handleWiFiConnectionChange(NetworkManager::Device::State newstate, NetworkManager::Device::State oldstate, NetworkManager::Device::StateChangeReason reason);
     void tryLubuntu();
     void installLubuntu();
 
@@ -40,7 +41,7 @@ private:
     NetworkManager::WirelessDevice::Ptr wifiDevice;
     QMap<QString, NetworkManager::WirelessNetwork::Ptr> wifiNetworkMap;
 
-    void handleWifiConnection(const QString &ssid);
+    void handleWifiConnection(const QString &ssid, bool recoverFromWrongPassword = false);
     void initLanguageComboBox();
     QStringList getAvailableLanguages() const;
     void showWifiOptions();
