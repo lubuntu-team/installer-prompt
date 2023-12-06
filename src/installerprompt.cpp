@@ -12,7 +12,6 @@
 #include <QScreen>
 #include <QMessageBox>
 #include <QUuid>
-#include <QLineEdit>
 #include <QDBusPendingReply>
 #include "installerprompt.h"
 #include "./ui_installerprompt.h"
@@ -21,6 +20,9 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::InstallerPrompt) {
     ui->setupUi(this);
+
+    // Hide the Incorrect Password text
+    ui->incorrectPassword->setVisible(false);
 
     // Set the background image and scale it
     QPixmap bg(":/background");
@@ -78,6 +80,8 @@ void InstallerPrompt::updateConnectionStatus() {
 
     switch (status) {
         case NetworkManager::Status::Disconnected:
+        case NetworkManager::ConnectedLinkLocal:
+        case NetworkManager::Asleep:
             statusText = tr("Not Connected");
             statusIndicator = "<span style=\"color: red;\">❌</span> " + statusText;
             break;
@@ -95,6 +99,7 @@ void InstallerPrompt::updateConnectionStatus() {
             statusIndicator = "<span style=\"color: yellow;\">🟡</span> " + statusText;
             break;
         default:
+            qDebug() << "Unknown status:" << status;
             statusText = tr("Unknown Status");
             statusIndicator = "<span style=\"color: grey;\">⚪</span> " + statusText;
     }
@@ -120,162 +125,154 @@ void InstallerPrompt::updateConnectionStatus() {
 
 void InstallerPrompt::handleWiFiConnectionChange(NetworkManager::Device::State newstate, NetworkManager::Device::State oldstate, NetworkManager::Device::StateChangeReason reason)
 {
-    if (reason == NetworkManager::Device::NoSecretsReason) {
+    QMutexLocker locker(&wifiChangeMutex);
+    if (reason == NetworkManager::Device::NoSecretsReason && !wifiWrongHandling) {
+        wifiWrongHandling = true;
+        qDebug() << wifiSSID;
+        
         foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
             if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
                 auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
-                if (wirelessSetting && wirelessSetting->ssid() == ui->networkComboBox->currentText()) {
-                    qDebug() << "Wiping connection with wrong password: " << ui->networkComboBox->currentText();
+                if (wirelessSetting && wirelessSetting->ssid() == wifiSSID) {
+                    qDebug() << "Wiping connection with wrong password: " << wifiSSID;
+                    // Show the Incorrect Password text
+                    ui->incorrectPassword->setVisible(true);
                     QDBusPendingReply removeReply = connection->remove();
                     removeReply.waitForFinished();
-                    handleWifiConnection(ui->networkComboBox->currentText(), true);
                 }
             }
         }
+        wifiWrongHandling = false;
     }
+}
+
+NetworkManager::Connection::Ptr InstallerPrompt::findConnectionBySsid(const QString &ssid) {
+    foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
+        if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
+            auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
+            if (wirelessSetting && wirelessSetting->ssid() == ssid) {
+                return connection;
+            }
+        }
+    }
+    return NetworkManager::Connection::Ptr(); // Return null pointer if not found
+}
+
+QString InstallerPrompt::promptForWifiPassword(const QString &ssid, bool isWrongPassword) {
+    QDialog passwordDialog(this);
+    passwordDialog.setModal(true);
+    passwordDialog.setWindowTitle(tr("Wi-Fi Password Required"));
+    passwordDialog.setWindowIcon(QIcon::fromTheme("network-wireless"));
+    passwordDialog.setStyleSheet("QLabel { color: black; } ");
+    passwordDialog.setMinimumWidth(250);
+    passwordDialog.setMinimumHeight(120);
+    passwordDialog.setMaximumWidth(5000);
+    passwordDialog.setMaximumHeight(500);
+
+    QVBoxLayout layout;
+    QLabel passwordLabel(tr("Enter password for \"%1\":").arg(ssid), &passwordDialog);
+    QLineEdit passwordLineEdit(&passwordDialog);
+    QPushButton passwordButton(tr("Connect"), &passwordDialog);
+
+    passwordLineEdit.setEchoMode(QLineEdit::Password);
+    layout.addWidget(&passwordLabel);
+    layout.addWidget(&passwordLineEdit);
+    layout.addWidget(&passwordButton);
+
+    passwordDialog.setLayout(&layout);
+
+    // Connect with a lambda function for inline validation
+    connect(&passwordLineEdit, &QLineEdit::textChanged, this, [&passwordLineEdit](const QString &text) {
+        int minLength = 8;
+        int maxLength = 64;
+        bool isValid = text.length() >= minLength && text.length() <= maxLength;
+        passwordLineEdit.setStyleSheet(isValid ? "" : "border: 1px solid red;");
+    });
+
+    connect(&passwordButton, &QPushButton::clicked, &passwordDialog, &QDialog::accept);
+
+    if (passwordDialog.exec() == QDialog::Accepted) {
+        return passwordLineEdit.text();
+    }
+
+    return QString();
 }
 
 void InstallerPrompt::handleWifiConnection(const QString &ssid, bool recoverFromWrongPassword) {
+    ui->incorrectPassword->setVisible(false);
     ui->networkComboBox->setEnabled(false);
+    wifiSSID = ssid;
     qDebug() << "Attempting to find connection for SSID:" << ssid;
-    if (!recoverFromWrongPassword) {
-        foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
-            if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
-                auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
-                if (wirelessSetting && wirelessSetting->ssid() == ssid) {
-                    qDebug() << "Attempting to use existing connection:" << ssid;
-                    NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
-                    qDebug() << "Successfully connected:" << ssid;
-                    ui->networkComboBox->setEnabled(true);
-                    return;
-                }
-            }
-        }
+
+    // Check for existing connection
+    NetworkManager::Connection::Ptr connection = findConnectionBySsid(ssid);
+    if (connection && !recoverFromWrongPassword) {
+        qDebug() << "Using existing connection for:" << ssid;
+        NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
+        ui->networkComboBox->setEnabled(true);
+        return;
     }
 
-    QMap<QString, QVariant> fullSettings = createSettingsBySSID(ssid);
-    NMVariantMapMap nmMap;
-
-    for (const auto &key : fullSettings.keys()) {
-        nmMap[key] = fullSettings[key].toMap();
+    // Prompt for Wi-Fi password
+    QString password = promptForWifiPassword(ssid);
+    if (password.isEmpty()) {
+        ui->networkComboBox->setEnabled(true);
+        return;
     }
 
-    NetworkManager::ConnectionSettings::Ptr newConnectionSettings(new NetworkManager::ConnectionSettings(NetworkManager::ConnectionSettings::Wireless));
-    newConnectionSettings->fromMap(nmMap);
-    QVariantMap wirelessSecurity = fullSettings.value("802-11-wireless-security").toMap();
-
-    //bool isOpenNetwork = wirelessSecurity.isEmpty() || wirelessSecurity.value("key-mgmt").toString().isEmpty();
-    //if (isOpenNetwork && wifiDevice && wifiDevice->isValid() && connection) {
-    //    qDebug() << "Attempting to connect to open network: " << ssid;
-    //    NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
-    //    return;
-    //}
-
-    // If the network is secured, display the password dialog
-    QDialog passwordDialog(this);
-    QVBoxLayout layout(&passwordDialog);
-    QLabel label(&passwordDialog);
-    if (!recoverFromWrongPassword) {
-        label.setText(tr("Enter Wi-Fi Password for %1:").arg(ssid));
-        label.setStyleSheet("color: black");
-    } else {
-        label.setText(tr("Wrong Wi-Fi password for %1. Try again:").arg(ssid));
-        label.setStyleSheet("color: red");
+    // Create new Wi-Fi connection
+    NMVariantMapMap settings = createSettingsBySSID(ssid);
+    if (settings.isEmpty()) {
+        QMessageBox::warning(this, tr("Error"), tr("Failed to create Wi-Fi settings."));
+        ui->networkComboBox->setEnabled(true);
+        return;
     }
-    QLineEdit lineEdit(&passwordDialog);
-    QPushButton button(tr("Connect"), &passwordDialog);
 
-    lineEdit.setEchoMode(QLineEdit::Password);
-    layout.addWidget(&label);
-    layout.addWidget(&lineEdit);
-    layout.addWidget(&button);
+    // Update the wireless security settings
+    QVariantMap wirelessSecurity;
+    wirelessSecurity["key-mgmt"] = "wpa-psk";
+    wirelessSecurity["psk"] = password;
+    settings["802-11-wireless-security"] = wirelessSecurity;
 
-    connect(&button, &QPushButton::clicked, &passwordDialog, &QDialog::accept);
-
-    for (int attempts = 0; attempts < 3; ++attempts) {
-        if (passwordDialog.exec() == QDialog::Rejected) {
-            ui->networkComboBox->setEnabled(true);
-            return;
-        }
-        QString password = lineEdit.text();
-        if (wifiDevice && wifiDevice->isValid()) {
-            // Update the wireless security settings in the map
-            wirelessSecurity["key-mgmt"] = "wpa-psk";
-            wirelessSecurity["psk"] = password;
-            fullSettings["802-11-wireless-security"] = wirelessSecurity;
-
-            // Convert QMap<QString, QVariant> to NMVariantMapMap
-            NMVariantMapMap nmMap;
-            for (const auto &key : fullSettings.keys()) {
-                nmMap[key] = fullSettings[key].toMap();
-            }
-
-            // Update the connection settings
-            qDebug() << "Saving the connection...";
-            QDBusObjectPath path;
-            NetworkManager::ConnectionSettings::Ptr newConnectionSettings(new NetworkManager::ConnectionSettings(NetworkManager::ConnectionSettings::Wireless));
-            newConnectionSettings->fromMap(nmMap);
-            QDBusPendingReply<QDBusObjectPath> addreply = NetworkManager::addConnection(nmMap);
-            addreply.waitForFinished();
-            if (addreply.isError()) {
-                qDebug() << nmMap;
-                qDebug() << "Unable to save the connection:" << addreply.error().message();
-            } else {
-                path = addreply.value();
-                qDebug() << "Added connection path:" << path.path();
-            }
-
-            NetworkManager::Connection::Ptr connection = NetworkManager::findConnection(path.path());
-            if (!connection) {
-                qDebug() << "Unable to retrieve the connection after saving:" << addreply.error().message();
-            }
-
-            QDBusPendingReply<QDBusObjectPath> reply = NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
-            reply.waitForFinished();
-            if (reply.isError()) {
-                qDebug() << "Unable to activate the connection:" << addreply.error().message();
-                QMessageBox::warning(this, tr("Connection Failed"), tr("Unable to connect to the network."));
-                ui->networkComboBox->setEnabled(true);
-                return;
-            } else {
-                NetworkManager::reloadConnections();
-                qDebug() << "Successfully connected:" << ssid;
-                // ui->networkComboBox->setEnabled(true); !!! We don't run this here since we actually *want* the box to remain locked right now
-                return;
-            }
-        }
+    // Add the new connection
+    QDBusPendingReply<QDBusObjectPath> reply = NetworkManager::addConnection(settings);
+    reply.waitForFinished();
+    if (reply.isError()) {
+        QMessageBox::warning(this, tr("Error"), tr("Failed to add Wi-Fi connection."));
+        ui->networkComboBox->setEnabled(true);
+        return;
     }
+
+    // Activate the new connection
+    QDBusObjectPath path = reply.value();
+    NetworkManager::activateConnection(path.path(), wifiDevice->uni(), QString());
+    ui->networkComboBox->setEnabled(true);
 }
 
-QMap<QString, QVariant> InstallerPrompt::createSettingsBySSID(const QString &ssid) {
-    // Create new connection settings
+NMVariantMapMap InstallerPrompt::createSettingsBySSID(const QString &ssid) {
+    NMVariantMapMap convertedSettings;
+
+    if (!wifiDevice) {
+        qWarning() << "Wi-Fi device not found. Unable to set interface name.";
+        return convertedSettings;
+    }
+
     NetworkManager::ConnectionSettings::Ptr newConnectionSettings(new NetworkManager::ConnectionSettings(NetworkManager::ConnectionSettings::Wireless));
     newConnectionSettings->setId(ssid);
     newConnectionSettings->setUuid(NetworkManager::ConnectionSettings::createNewUuid());
-
-    // Set interface name from wifiDevice
-    if (wifiDevice) {
-        newConnectionSettings->setInterfaceName(wifiDevice->interfaceName());
-    } else {
-        qWarning() << "Wi-Fi device not found. Unable to set interface name.";
-        return QMap<QString, QVariant>();
-    }
+    newConnectionSettings->setInterfaceName(wifiDevice->interfaceName());
 
     // Configure wireless settings
     QVariantMap wirelessSetting;
     wirelessSetting.insert("ssid", ssid.toUtf8());
+    convertedSettings.insert("802-11-wireless", wirelessSetting);
 
-    // Configure wireless security settings
-    NetworkManager::WirelessSecuritySetting::Ptr wirelessSecuritySetting = newConnectionSettings->setting(NetworkManager::Setting::WirelessSecurity).staticCast<NetworkManager::WirelessSecuritySetting>();
-    wirelessSecuritySetting->setKeyMgmt(NetworkManager::WirelessSecuritySetting::WpaPsk);
-
-    // Convert settings to QVariantMap
-    QMap<QString, QVariant> convertedSettings;
+    // Convert other settings
     const auto settingsMap = newConnectionSettings->toMap();
     for (const auto &key : settingsMap.keys()) {
-        convertedSettings[key] = QVariant::fromValue(settingsMap[key]);
+        QVariant value = settingsMap.value(key);
+        convertedSettings.insert(key, value.toMap());
     }
-    convertedSettings.insert("802-11-wireless", wirelessSetting);
 
     return convertedSettings;
 }
@@ -334,7 +331,6 @@ void InstallerPrompt::refreshNetworkList() {
     }
 
     // Update the main map and combo box only after the new list is ready
-    wifiNetworkMap.swap(tempWifiNetworkMap);
     ui->networkComboBox->clear();
     ui->networkComboBox->addItems(ssidList);
 

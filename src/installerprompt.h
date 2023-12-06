@@ -7,15 +7,11 @@
 #include <QPushButton>
 #include <QLabel>
 #include <QDialog>
+#include <QMutex>
+#include <QLineEdit>
 #include <NetworkManagerQt/Device>
 #include <NetworkManagerQt/WirelessDevice>
 #include <NetworkManagerQt/WirelessNetwork>
-
-namespace NetworkManager {
-    class Device;
-    class WirelessDevice;
-    class WirelessNetwork;
-}
 
 namespace Ui { class InstallerPrompt; }
 
@@ -39,14 +35,19 @@ private:
     Ui::InstallerPrompt *ui;
     QProcess *process;
     NetworkManager::WirelessDevice::Ptr wifiDevice;
-    QMap<QString, NetworkManager::WirelessNetwork::Ptr> wifiNetworkMap;
+    QString wifiSSID;
+    QMutex wifiChangeMutex;
+    NetworkManager::Connection::Ptr findConnectionBySsid(const QString &ssid);
+    bool wifiWrongHandling = false;
+    QLineEdit *passwordLineEdit;
 
     void handleWifiConnection(const QString &ssid, bool recoverFromWrongPassword = false);
+    QString promptForWifiPassword(const QString &ssid, bool isWrongPassword = false);
+    void connectToWifi(const QString &ssid, const QString &password, bool recoverFromWrongPassword = false);
     void initLanguageComboBox();
     QStringList getAvailableLanguages() const;
     void showWifiOptions();
-    NetworkManager::Connection::Ptr findConnectionBySsid(const QString &ssid);
-    QMap<QString, QVariant> createSettingsBySSID(const QString &ssid);
+    NMVariantMapMap createSettingsBySSID(const QString &ssid);
 };
 
 #endif // INSTALLERPROMPT_H
