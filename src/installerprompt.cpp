@@ -50,6 +50,9 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     // Set up the language combo box with available languages
     initLanguageComboBox();
 
+    // Connect the language combo box to the onLanguageChanged slot
+    connect(ui->languageComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onLanguageChanged(int)));
+
     // Check initial network status and update UI
     updateConnectionStatus();
 
@@ -340,8 +343,11 @@ void InstallerPrompt::refreshNetworkList() {
 }
 
 void InstallerPrompt::initLanguageComboBox() {
+    languageLocaleMap.clear();
     QStringList languages = getAvailableLanguages();
-    ui->languageComboBox->addItems(languages);
+    for (const auto &language : languages) {
+        ui->languageComboBox->addItem(language);
+    }
 
     QString defaultLanguage = "English (United States)";
     int defaultIndex = ui->languageComboBox->findText(defaultLanguage);
@@ -350,7 +356,7 @@ void InstallerPrompt::initLanguageComboBox() {
     }
 }
 
-QStringList InstallerPrompt::getAvailableLanguages() const {
+QStringList InstallerPrompt::getAvailableLanguages() {
     QMap<QString, QString> languageMap; // Default sorting by QString is case-sensitive
 
     auto sanitize = [](QString s) -> QString {
@@ -384,17 +390,38 @@ QStringList InstallerPrompt::getAvailableLanguages() const {
             languageMap.insert(displayName, locale.name());
         }
     }
-
+    // Sort the language display names
     QStringList sortedLanguages = languageMap.keys();
     std::sort(sortedLanguages.begin(), sortedLanguages.end(), [](const QString &a, const QString &b) {
         return a.compare(b, Qt::CaseInsensitive) < 0;
     });
 
+    // Clear the existing languageLocaleMap and repopulate it based on sortedLanguages
+    languageLocaleMap.clear();
+    for (const QString &languageName : sortedLanguages) {
+        languageLocaleMap.insert(languageName, languageMap[languageName]);
+    }
+
     return sortedLanguages;
 }
 
 void InstallerPrompt::onLanguageChanged(int index) {
-    // Placeholder for handling language change
+    QString selectedLanguage = ui->languageComboBox->itemText(index);
+    QString localeName = languageLocaleMap.value(selectedLanguage);
+    qDebug() << selectedLanguage;
+    qDebug() << index << languageLocaleMap;
+
+    // Split the locale name to get language and country code
+    QStringList localeParts = localeName.split('_');
+    QString languageCode = localeParts.value(0);
+    QString countryCode = localeParts.value(1);
+
+    // Construct the command to run the script with parameters
+    QString scriptPath = "/usr/libexec/change-system-language";  // Update with the actual path
+    QStringList arguments;
+    arguments << languageCode << countryCode;
+
+    QProcess::execute(scriptPath, arguments);
 }
 
 void InstallerPrompt::tryLubuntu()

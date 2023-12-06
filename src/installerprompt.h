@@ -40,12 +40,13 @@ private:
     NetworkManager::Connection::Ptr findConnectionBySsid(const QString &ssid);
     bool wifiWrongHandling = false;
     QLineEdit *passwordLineEdit;
+    QMap<QString, QString> languageLocaleMap;
 
     void handleWifiConnection(const QString &ssid, bool recoverFromWrongPassword = false);
     QString promptForWifiPassword(const QString &ssid, bool isWrongPassword = false);
     void connectToWifi(const QString &ssid, const QString &password, bool recoverFromWrongPassword = false);
     void initLanguageComboBox();
-    QStringList getAvailableLanguages() const;
+    QStringList getAvailableLanguages();
     void showWifiOptions();
     NMVariantMapMap createSettingsBySSID(const QString &ssid);
 };
