@@ -62,6 +62,10 @@ QLabel#logoLabel {
 
 QLabel#incorrectPassword {
     color: red;
+}
+
+KBusyIndicatorWidget {
+    color: blue;
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -172,6 +176,19 @@ QLabel#incorrectPassword {
        </layout>
       </item>
       <item>
+       <spacer name="verticalSpacer_7">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
        <spacer name="WiFiSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -186,8 +203,43 @@ QLabel#incorrectPassword {
       </item>
       <item>
        <layout class="QGridLayout" name="WiFiLayout">
-        <item row="0" column="3">
-         <widget class="QPushButton" name="pushButton">
+        <item row="2" column="2">
+         <widget class="QComboBox" name="languageComboBox">
+          <property name="minimumSize">
+           <size>
+            <width>352</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>550</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="1">
+         <widget class="QLabel" name="translationsLabel">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Select Your Language:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="4">
+         <widget class="QPushButton" name="confirmButton">
           <property name="minimumSize">
            <size>
             <width>175</width>
@@ -212,8 +264,78 @@ QLabel#incorrectPassword {
           </property>
          </widget>
         </item>
-        <item row="0" column="2">
-         <widget class="QComboBox" name="languageComboBox">
+        <item row="5" column="2">
+         <widget class="QLabel" name="incorrectPassword">
+          <property name="enabled">
+           <bool>true</bool>
+          </property>
+          <property name="font">
+           <font>
+            <pointsize>16</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>You entered an incorrect password. Please try again.</string>
+          </property>
+         </widget>
+        </item>
+        <item row="3" column="2">
+         <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="6" column="6">
+         <spacer name="networkSpacer2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="6" column="1">
+         <widget class="QLabel" name="WiFiLabel">
+          <property name="font">
+           <font>
+            <pointsize>18</pointsize>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>Select a Wi-Fi Network:</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="1">
+         <spacer name="advancedSpacer">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="6" column="2">
+         <widget class="QComboBox" name="networkComboBox">
           <property name="minimumSize">
            <size>
             <width>352</width>
@@ -233,39 +355,8 @@ QLabel#incorrectPassword {
           </property>
          </widget>
         </item>
-        <item row="3" column="2">
-         <widget class="QLabel" name="incorrectPassword">
-          <property name="enabled">
-           <bool>true</bool>
-          </property>
-          <property name="font">
-           <font>
-            <pointsize>16</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>You entered an incorrect password. Please try again.</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QLabel" name="WiFiLabel">
-          <property name="font">
-           <font>
-            <pointsize>18</pointsize>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>Select a Wi-Fi Network:</string>
-          </property>
-         </widget>
-        </item>
-        <item row="5" column="1">
-         <spacer name="advancedSpacer">
+        <item row="6" column="0">
+         <spacer name="networkSpacer1">
           <property name="orientation">
            <enum>Qt::Horizontal</enum>
           </property>
@@ -277,7 +368,33 @@ QLabel#incorrectPassword {
           </property>
          </spacer>
         </item>
-        <item row="4" column="3">
+        <item row="7" column="2">
+         <widget class="QLabel" name="WiFiInfoLabel">
+          <property name="font">
+           <font>
+            <weight>75</weight>
+            <bold>true</bold>
+           </font>
+          </property>
+          <property name="text">
+           <string>(For advanced network configuration, select &quot;Try Lubuntu&quot;)</string>
+          </property>
+         </widget>
+        </item>
+        <item row="7" column="4">
+         <spacer name="advancedSpacer_2">
+          <property name="orientation">
+           <enum>Qt::Horizontal</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>40</width>
+            <height>20</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+        <item row="6" column="4">
          <widget class="QPushButton" name="connectWiFiButton">
           <property name="minimumSize">
            <size>
@@ -303,105 +420,41 @@ QLabel#incorrectPassword {
           </property>
          </widget>
         </item>
-        <item row="4" column="0">
-         <spacer name="networkSpacer1">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="0" column="1">
-         <widget class="QLabel" name="translationsLabel">
+        <item row="1" column="2">
+         <widget class="QLabel" name="changingLanguageLabel">
           <property name="font">
            <font>
-            <pointsize>18</pointsize>
+            <pointsize>16</pointsize>
             <weight>75</weight>
             <bold>true</bold>
            </font>
           </property>
           <property name="text">
-           <string>Select Your Language:</string>
+           <string>Changing language...</string>
           </property>
          </widget>
         </item>
-        <item row="5" column="3">
-         <spacer name="advancedSpacer_2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
+        <item row="1" column="4">
+         <widget class="KBusyIndicatorWidget" name="changingLanguageLoader">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
           </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="1" column="2">
-         <spacer name="verticalSpacer_3">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>20</width>
-            <height>40</height>
-           </size>
-          </property>
-         </spacer>
-        </item>
-        <item row="4" column="2">
-         <widget class="QComboBox" name="networkComboBox">
           <property name="minimumSize">
            <size>
-            <width>352</width>
-            <height>50</height>
+            <width>35</width>
+            <height>35</height>
            </size>
           </property>
           <property name="maximumSize">
            <size>
-            <width>550</width>
-            <height>50</height>
+            <width>35</width>
+            <height>35</height>
            </size>
           </property>
-          <property name="font">
-           <font>
-            <pointsize>16</pointsize>
-           </font>
-          </property>
          </widget>
-        </item>
-        <item row="5" column="2">
-         <widget class="QLabel" name="WiFiInfoLabel">
-          <property name="font">
-           <font>
-            <weight>75</weight>
-            <bold>true</bold>
-           </font>
-          </property>
-          <property name="text">
-           <string>(For advanced network configuration, select &quot;Try Lubuntu&quot;)</string>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="4">
-         <spacer name="networkSpacer2">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-          <property name="sizeHint" stdset="0">
-           <size>
-            <width>40</width>
-            <height>20</height>
-           </size>
-          </property>
-         </spacer>
         </item>
        </layout>
       </item>
@@ -710,6 +763,11 @@ QToolTip {
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <customwidgets>
+  <customwidget>
+   <class>KBusyIndicatorWidget</class>
+   <extends>QWidget</extends>
+   <header>kbusyindicatorwidget.h</header>
+  </customwidget>
   <customwidget>
    <class>KLed</class>
    <extends>QWidget</extends>

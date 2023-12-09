@@ -1,3 +1,5 @@
+#include <KBusyIndicatorWidget>
+#include <KLed>
 #include <NetworkManagerQt/ConnectionSettings>
 #include <NetworkManagerQt/Manager>
 #include <NetworkManagerQt/Device>
@@ -13,7 +15,6 @@
 #include <QMessageBox>
 #include <QUuid>
 #include <QDBusPendingReply>
-#include <KLed>
 #include "installerprompt.h"
 #include "./ui_installerprompt.h"
 
@@ -22,8 +23,10 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     , ui(new Ui::InstallerPrompt) {
     ui->setupUi(this);
 
-    // Hide the Incorrect Password text
+    // Hide the Incorrect Password and loading text
     ui->incorrectPassword->setVisible(false);
+    ui->changingLanguageLabel->setVisible(false);
+    ui->changingLanguageLoader->setVisible(false);
 
     // Set the background image and scale it
     QPixmap bg(":/background");
@@ -47,11 +50,12 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     connect(ui->tryLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::tryLubuntu);
     connect(ui->installLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::installLubuntu);
     connect(ui->connectWiFiButton, &QAbstractButton::clicked, this, &InstallerPrompt::onConnectWifiClicked);
+    connect(ui->confirmButton, &QAbstractButton::clicked, this, &InstallerPrompt::onLanguageConfirm);
 
     // Set up the language combo box with available languages
     initLanguageComboBox();
 
-    // Connect the language combo box to the onLanguageChanged slot
+    // Connect the appropriate language slots
     connect(ui->languageComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onLanguageChanged(int)));
 
     // Check initial network status and update UI
@@ -414,22 +418,54 @@ QStringList InstallerPrompt::getAvailableLanguages() {
 }
 
 void InstallerPrompt::onLanguageChanged(int index) {
-    QString selectedLanguage = ui->languageComboBox->itemText(index);
-    QString localeName = languageLocaleMap.value(selectedLanguage);
-    qDebug() << selectedLanguage;
-    qDebug() << index << languageLocaleMap;
+    selectedLanguage = ui->languageComboBox->itemText(index);
+}
+
+void InstallerPrompt::onLanguageConfirm() {
+    ui->changingLanguageLabel->setVisible(true);
+    ui->changingLanguageLoader->setVisible(true);
+
+    localeName = languageLocaleMap.value(selectedLanguage);
+    qDebug() << selectedLanguage << localeName;
 
     // Split the locale name to get language and country code
     QStringList localeParts = localeName.split('_');
     QString languageCode = localeParts.value(0);
     QString countryCode = localeParts.value(1);
 
-    // Construct the command to run the script with parameters
-    QString scriptPath = "/usr/libexec/change-system-language";  // Update with the actual path
-    QStringList arguments;
-    arguments << languageCode << countryCode;
+    // If there is no internet connection and we don't ship the langpack, tell them
+    //QStringList allowedLanguages = {"zh-hans", "hi", "es", "fr", "ar", "en"};
+    QStringList allowedLanguages = {"zh-hans", "hi", "fr", "ar", "en"};
+    bool only_lxqt = false;
+    if (!allowedLanguages.contains(languageCode) && NetworkManager::status() != NetworkManager::Status::Connected) {
+        ui->changingLanguageLabel->setText(tr("Unable to download full language support, changing anyway..."));
+        only_lxqt = true;
+    } else {
+        ui->changingLanguageLabel->setText(tr("Changing language..."));
+    }
 
-    QProcess::execute(scriptPath, arguments);
+    // Construct the command to run the script with parameters
+    QProcess *process = new QProcess(this);
+    QStringList arguments;
+
+    process->setProgram("/usr/libexec/change-system-language");
+    arguments << languageCode << countryCode;
+    if (only_lxqt) arguments << "1";
+    process->setArguments(arguments);
+
+    connect(process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this, &InstallerPrompt::languageProcessFinished);
+    connect(process, &QProcess::errorOccurred, this, &InstallerPrompt::languageProcessError);
+    process->start();
+}
+
+void InstallerPrompt::languageProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
+    qDebug() << "Process finished. Exit code:" << exitCode << "Exit status:" << exitStatus;
+    ui->changingLanguageLabel->setVisible(false);
+    ui->changingLanguageLoader->setVisible(false);
+}
+
+void InstallerPrompt::languageProcessError(QProcess::ProcessError error) {
+    qDebug() << "Process failed with error:" << error;
 }
 
 void InstallerPrompt::tryLubuntu()

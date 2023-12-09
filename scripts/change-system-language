@@ -3,7 +3,11 @@
 LANGUAGE_CODE=$1
 COUNTRY_CODE=$2
 LOCALE="${LANGUAGE_CODE}_${COUNTRY_CODE}.UTF-8"
+ONLY_LXQT=$3
 
-apt-get -y install language-pack-gnome-$LANGUAGE_CODE language-pack-kde-$LANGUAGE_CODE
+if [ -z "$ONLY_LXQT" ]; then
+    apt-get -y install language-pack-gnome-$LANGUAGE_CODE language-pack-kde-$LANGUAGE_CODE
+fi
+
 update-locale LANGUAGE=$LOCALE LANG=$LOCALE LC_ALL=$LOCALE
 systemctl restart sddm

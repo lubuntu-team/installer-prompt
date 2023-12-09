@@ -9,6 +9,7 @@
 #include <QDialog>
 #include <QMutex>
 #include <QLineEdit>
+#include <QProcess>
 #include <NetworkManagerQt/Device>
 #include <NetworkManagerQt/WirelessDevice>
 #include <NetworkManagerQt/WirelessNetwork>
@@ -25,11 +26,14 @@ public:
 private slots:
     void refreshNetworkList();
     void onLanguageChanged(int index);
+    void onLanguageConfirm();
     void onConnectWifiClicked();
     void updateConnectionStatus();
     void handleWiFiConnectionChange(NetworkManager::Device::State newstate, NetworkManager::Device::State oldstate, NetworkManager::Device::StateChangeReason reason);
     void tryLubuntu();
     void installLubuntu();
+    void languageProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
+    void languageProcessError(QProcess::ProcessError error);
 
 private:
     Ui::InstallerPrompt *ui;
@@ -41,6 +45,8 @@ private:
     bool wifiWrongHandling = false;
     QLineEdit *passwordLineEdit;
     QMap<QString, QString> languageLocaleMap;
+    QString selectedLanguage = "English (United States)";
+    QString localeName = "en_US";
 
     void handleWifiConnection(const QString &ssid, bool recoverFromWrongPassword = false);
     QString promptForWifiPassword(const QString &ssid, bool isWrongPassword = false);
