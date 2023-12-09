@@ -1,3 +1,18 @@
+/*
+ * Copyright (C) 2022-2023 Lubuntu Developers <lubuntu-devel@lists.ubuntu.com>
+ * Authored by: Simon Quigley <tsimonq2@lubuntu.me>
+ *              Aaron Rainbolt <arraybolt3@lubuntu.me>
+ *
+ * This is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, version 3 of the License.
+ *
+ * This is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+ * GNU General Public License for more details.
+ */
+
 #include "installerprompt.h"
 #include <QApplication>
 #include <QScreen>
