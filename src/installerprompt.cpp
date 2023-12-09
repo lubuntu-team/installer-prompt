@@ -434,8 +434,7 @@ void InstallerPrompt::onLanguageConfirm() {
     QString countryCode = localeParts.value(1);
 
     // If there is no internet connection and we don't ship the langpack, tell them
-    //QStringList allowedLanguages = {"zh-hans", "hi", "es", "fr", "ar", "en"};
-    QStringList allowedLanguages = {"zh-hans", "hi", "fr", "ar", "en"};
+    QStringList allowedLanguages = {"zh-hans", "hi", "es", "fr", "ar", "en"};
     bool only_lxqt = false;
     if (!allowedLanguages.contains(languageCode) && NetworkManager::status() != NetworkManager::Status::Connected) {
         ui->changingLanguageLabel->setText(tr("Unable to download full language support, changing anyway..."));
