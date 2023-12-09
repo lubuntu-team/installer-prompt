@@ -13,7 +13,7 @@ find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core Widgets Network LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Network LinguistTools)
-find_package(KF5 REQUIRED COMPONENTS NetworkManagerQt Notifications)
+find_package(KF5 REQUIRED COMPONENTS NetworkManagerQt WidgetsAddons)
 
 set(TS_FILES
     src/translations/lubuntu-installer-prompt_en_US.ts
@@ -44,7 +44,7 @@ add_executable(lubuntu-installer-prompt
 
 add_dependencies(lubuntu-installer-prompt translations)
 
-target_link_libraries(lubuntu-installer-prompt PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt5::Network KF5::NetworkManagerQt KF5::Notifications)
+target_link_libraries(lubuntu-installer-prompt PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt5::Network KF5::NetworkManagerQt KF5::WidgetsAddons)
 
 install(TARGETS lubuntu-installer-prompt
     BUNDLE DESTINATION .

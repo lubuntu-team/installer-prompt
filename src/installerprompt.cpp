@@ -13,6 +13,7 @@
 #include <QMessageBox>
 #include <QUuid>
 #include <QDBusPendingReply>
+#include <KLed>
 #include "installerprompt.h"
 #include "./ui_installerprompt.h"
 
@@ -79,34 +80,41 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
 void InstallerPrompt::updateConnectionStatus() {
     auto status = NetworkManager::status();
     bool online = false;
-    QString statusText, statusIndicator;
+    QString statusText;
 
     switch (status) {
         case NetworkManager::Status::Disconnected:
         case NetworkManager::ConnectedLinkLocal:
         case NetworkManager::Asleep:
             statusText = tr("Not Connected");
-            statusIndicator = "<span style=\"color: red;\">❌</span> " + statusText;
+            ui->connectionLED->setColor(Qt::red);
+            ui->connectionLED->setState(KLed::Off);
             break;
         case NetworkManager::Status::Connected:
             online = true;
             statusText = tr("Connected");
-            statusIndicator = "<span style=\"color: green;\">🟢</span> " + statusText;
+            ui->connectionLED->setColor(Qt::green);
+            ui->connectionLED->setState(KLed::On);
             break;
         case NetworkManager::Status::Connecting:
             statusText = tr("Connecting...");
-            statusIndicator = "<span style=\"color: yellow;\">🟡</span> " + statusText;
+            ui->connectionLED->setColor(Qt::yellow);
+            ui->connectionLED->setState(KLed::On);
             break;
         case NetworkManager::Status::Disconnecting:
             statusText = tr("Disconnecting...");
-            statusIndicator = "<span style=\"color: yellow;\">🟡</span> " + statusText;
+            ui->connectionLED->setColor(Qt::yellow);
+            ui->connectionLED->setState(KLed::On);
             break;
         default:
             qDebug() << "Unknown status:" << status;
             statusText = tr("Unknown Status");
-            statusIndicator = "<span style=\"color: grey;\">⚪</span> " + statusText;
+            ui->connectionLED->setColor(Qt::gray);
+            ui->connectionLED->setState(KLed::Off);
+            break;
     }
-    ui->connectionStatusLabel->setText(statusIndicator);   
+
+    ui->connectionStatusLabel->setText(statusText);
  
     const auto devices = NetworkManager::networkInterfaces();
     bool wifiEnabled = false;
