@@ -51,6 +51,7 @@ install(TARGETS lubuntu-installer-prompt
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+install(PROGRAMS "scripts/change-system-language" DESTINATION libexec)
 install(PROGRAMS "scripts/lubuntu-installer" DESTINATION libexec)
 install(PROGRAMS "scripts/start-lubuntu-live-env" DESTINATION bin)
 install(FILES "lubuntu-live-environment.desktop" DESTINATION share/xsessions)
