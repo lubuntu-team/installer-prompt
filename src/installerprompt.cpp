@@ -424,6 +424,9 @@ void InstallerPrompt::onLanguageChanged(int index) {
 void InstallerPrompt::onLanguageConfirm() {
     ui->changingLanguageLabel->setVisible(true);
     ui->changingLanguageLoader->setVisible(true);
+    ui->languageComboBox->setEnabled(false);
+    ui->tryLubuntu->setEnabled(false);
+    ui->installLubuntu->setEnabled(false);
 
     localeName = languageLocaleMap.value(selectedLanguage);
     qDebug() << selectedLanguage << localeName;
@@ -472,6 +475,9 @@ void InstallerPrompt::languageProcessFinished(int exitCode, QProcess::ExitStatus
     qDebug() << "Process finished. Exit code:" << exitCode << "Exit status:" << exitStatus;
     ui->changingLanguageLabel->setVisible(false);
     ui->changingLanguageLoader->setVisible(false);
+    ui->languageComboBox->setEnabled(true);
+    ui->tryLubuntu->setEnabled(true);
+    ui->installLubuntu->setEnabled(true);
 }
 
 void InstallerPrompt::languageProcessError(QProcess::ProcessError error) {
