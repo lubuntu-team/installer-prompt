@@ -443,12 +443,23 @@ void InstallerPrompt::onLanguageConfirm() {
         ui->changingLanguageLabel->setText(tr("Changing language..."));
     }
 
+    // Some of the LibreOffice language packs need special-casing, do that here
+    QString libreOfficeLang;
+    if (localeParts[0] == "zh") {
+        libreOfficeLang = (countryCode == "CN" || countryCode == "SG" || countryCode == "MY") ? "zh-cn" : "zh-tw";
+    } else {
+        static const QMap<QString, QString> localeMap = {
+            {"en_GB", "en-gb"}, {"en_ZA", "en-za"}, {"pa_IN", "pa-in"}, {"pt_BR", "pt-br"}
+        };
+        libreOfficeLang = localeMap.value(localeParts.join('_'), languageCode);
+    }
+
     // Construct the command to run the script with parameters
     QProcess *process = new QProcess(this);
     QStringList arguments;
 
     process->setProgram("/usr/libexec/change-system-language");
-    arguments << languageCode << countryCode;
+    arguments << languageCode << countryCode << libreOfficeLang;
     if (only_lxqt) arguments << "1";
     process->setArguments(arguments);
 
