@@ -27,6 +27,8 @@ set(PROJECT_SOURCES
     src/installerprompt.cpp
     src/installerprompt.h
     src/installerprompt.ui
+    src/backgroundscreen.h
+    src/backgroundscreen.cpp
     src/resource.qrc
 )
 

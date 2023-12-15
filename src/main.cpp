@@ -14,6 +14,7 @@
  */
 
 #include "installerprompt.h"
+#include "backgroundscreen.h"
 #include <QApplication>
 #include <QScreen>
 #include <QTranslator>
@@ -32,23 +33,20 @@ int main(int argc, char *argv[])
         }
     }
 
-    QList<InstallerPrompt*> ws;
+    InstallerPrompt* w;
+    QList<BackgroundScreen *> bss;
 
     // Iterate through all available screens
     for (QScreen *screen : QApplication::screens()) {
-        InstallerPrompt *w = new InstallerPrompt();
-        w->setGeometry(screen->geometry());
-        w->show();
-        ws.append(w);
-    }
-
-    for (InstallerPrompt *w : ws) {
-        for (InstallerPrompt *otherWindow : ws) {
-            if (w != otherWindow) {
-                // Connect signals and slots for synchronization
-                // Example: connect(ws.last(), &InstallerPrompt::someSignal, otherWindow, &InstallerPrompt::someSlot);
-            }
+        if (screen == QApplication::primaryScreen()) {
+            w = new InstallerPrompt();
+            w->showFullScreen();
+            continue;
         }
+        BackgroundScreen *backscreen = new BackgroundScreen();
+        backscreen->setGeometry(screen->geometry());
+        backscreen->showFullScreen();
+        bss.append(backscreen);
     }
 
     return app.exec();
