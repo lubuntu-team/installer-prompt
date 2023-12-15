@@ -508,6 +508,8 @@ void InstallerPrompt::installLubuntu()
 {
     ui->tryLubuntu->setVisible(false);
     ui->installLubuntu->setVisible(false);
+    ui->confirmButton->setVisible(false);
+    ui->languageComboBox->setEnabled(false);
     QProcess *calamares = new QProcess(this);
     QStringList args;
     calamares->start("/usr/libexec/lubuntu-installer", args);
