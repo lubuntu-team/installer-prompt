@@ -1,11 +1,11 @@
 #!/bin/bash
 # Starts the Lubuntu Live Environment.
 
-openbox &
-sudo lubuntu-installer-prompt # This is intentionally *not* backgrounded.
-# If it exits...
 export XDG_CONFIG_DIRS="/etc/xdg/xdg-Lubuntu:"$XDG_CONFIG_DIRS
 export XDG_DATA_DIRS="/usr/share/Lubuntu:"$XDG_DATA_DIRS
 export DESKTOP_SESSION="Lubuntu"
+openbox &
+sudo lubuntu-installer-prompt # This is intentionally *not* backgrounded.
+# If it exits...
 killall openbox
 startlxqt

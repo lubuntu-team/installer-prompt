@@ -58,7 +58,6 @@ install(PROGRAMS "scripts/change-system-language" DESTINATION libexec)
 install(PROGRAMS "scripts/lubuntu-installer" DESTINATION libexec)
 install(PROGRAMS "scripts/start-lubuntu-live-env" DESTINATION bin)
 install(FILES "lubuntu-live-environment.desktop" DESTINATION share/xsessions)
-install(CODE "execute_process(COMMAND ${CMAKE_COMMAND} -E create_symlink /etc/xdg/xdg-Lubuntu /etc/xdg/xdg-lubuntu-live-environment)")
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(lubuntu-installer-prompt)
