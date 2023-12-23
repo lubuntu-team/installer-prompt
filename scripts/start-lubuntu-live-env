@@ -1,11 +1,17 @@
 #!/bin/bash
 # Starts the Lubuntu Live Environment.
 
+# This is pretty overkill, but don't remove anything without testing
 export XDG_CONFIG_DIRS="/etc/xdg/xdg-Lubuntu:"$XDG_CONFIG_DIRS
 export XDG_DATA_DIRS="/usr/share/Lubuntu:"$XDG_DATA_DIRS
+export XDG_SESSION_CLASS="user"
+export XDG_SESSION_DESKTOP="Lubuntu"
 export DESKTOP_SESSION="Lubuntu"
+export QT_STYLE_OVERRIDE="Breeze"
+export QT_QPA_PLATFORMTHEME="lxqt"
+
 openbox &
-sudo lubuntu-installer-prompt # This is intentionally *not* backgrounded.
+sudo -E lubuntu-installer-prompt # This is intentionally *not* backgrounded.
 # If it exits...
 killall openbox
 startlxqt

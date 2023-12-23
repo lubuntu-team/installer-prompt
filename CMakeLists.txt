@@ -56,7 +56,7 @@ install(TARGETS lubuntu-installer-prompt
 )
 install(PROGRAMS "scripts/change-system-language" DESTINATION libexec)
 install(PROGRAMS "scripts/lubuntu-installer" DESTINATION libexec)
-install(PROGRAMS "scripts/start-lubuntu-live-env" DESTINATION bin)
+install(PROGRAMS "scripts/start-lubuntu-live-env" DESTINATION libexec)
 install(FILES "lubuntu-live-environment.desktop" DESTINATION share/xsessions)
 
 if(QT_VERSION_MAJOR EQUAL 6)
