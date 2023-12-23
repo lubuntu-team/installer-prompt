@@ -376,10 +376,15 @@ QString InstallerPrompt::getDisplayNameForLocale(const QLocale &locale) {
         return s;
     };
 
+    QLocale currentAppLocale = QLocale::system();
     QString nativeName = locale.nativeLanguageName();
     QString nativeCountryName = sanitize(locale.nativeCountryName());
-    QString englishLanguageName = QLocale::languageToString(locale.language());
-    QString englishCountryName = sanitize(QLocale::countryToString(locale.country()));
+    QString englishLanguageName = currentAppLocale.languageToString(locale.language());
+    QString englishCountryName = sanitize(currentAppLocale.countryToString(locale.country()));
+
+    if (nativeName.isEmpty() || nativeCountryName.isEmpty()) {
+        return QString();
+    }
 
     // Rename "American English" to "English"
     if (locale.language() == QLocale::English) {
@@ -419,31 +424,29 @@ void InstallerPrompt::initLanguageComboBox() {
 }
 
 QStringList InstallerPrompt::getAvailableLanguages() {
-    QMap<QString, QString> languageMap; // Default sorting by QString is case-sensitive
+    QMap<QString, QString> language_map; // Default sorting by QString is case-sensitive
 
-    for (int language = QLocale::C; language <= QLocale::LastLanguage; ++language) {
-        foreach (int country, QLocale::countriesForLanguage(static_cast<QLocale::Language>(language))) {
-            QLocale locale(static_cast<QLocale::Language>(language), static_cast<QLocale::Country>(country));
+    QList<QLocale> all_locales = QLocale::matchingLocales(QLocale::AnyLanguage, QLocale::AnyScript, QLocale::AnyCountry);
+    for (const QLocale &locale : all_locales) {
+        QString display_name = getDisplayNameForLocale(locale);
+        if (display_name.isEmpty()) continue;
 
-            QString displayName = getDisplayNameForLocale(locale);
-            if (displayName.isEmpty()) continue;
-
-            languageMap.insert(displayName, locale.name());
-        }
+        language_map.insert(display_name, locale.name());
     }
+
     // Sort the language display names
-    QStringList sortedLanguages = languageMap.keys();
-    std::sort(sortedLanguages.begin(), sortedLanguages.end(), [](const QString &a, const QString &b) {
+    QStringList sorted_languages = language_map.keys();
+    std::sort(sorted_languages.begin(), sorted_languages.end(), [](const QString &a, const QString &b) {
         return a.compare(b, Qt::CaseInsensitive) < 0;
     });
 
     // Clear the existing languageLocaleMap and repopulate it based on sortedLanguages
     languageLocaleMap.clear();
-    for (const QString &languageName : sortedLanguages) {
-        languageLocaleMap.insert(languageName, languageMap[languageName]);
+    for (const QString &language_name : sorted_languages) {
+        languageLocaleMap.insert(language_name, language_map[language_name]);
     }
 
-    return sortedLanguages;
+    return sorted_languages;
 }
 
 void InstallerPrompt::onLanguageChanged(int index) {
