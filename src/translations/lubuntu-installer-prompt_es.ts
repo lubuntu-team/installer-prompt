@@ -16,12 +16,12 @@
     <message>
         <location filename="../installerprompt.ui" line="263"/>
         <source>✅ Confirm</source>
-        <translation type="unfinished"></translation>
+        <translation>✅ Confirmar</translation>
     </message>
     <message>
         <location filename="../installerprompt.ui" line="280"/>
         <source>You entered an incorrect password. Please try again.</source>
-        <translation type="unfinished"></translation>
+        <translation>Ha ingresado una contraseña incorrecta. Intente de nuevo.</translation>
     </message>
     <message>
         <location filename="../installerprompt.ui" line="320"/>
@@ -41,13 +41,13 @@
     <message>
         <location filename="../installerprompt.ui" line="419"/>
         <source>✅ Connect</source>
-        <translation type="unfinished"></translation>
+        <translation>✅ Conectar</translation>
     </message>
     <message>
         <location filename="../installerprompt.ui" line="433"/>
         <location filename="../installerprompt.cpp" line="475"/>
         <source>Changing language...</source>
-        <translation type="unfinished"></translation>
+        <translation>Cambiando idioma...</translation>
     </message>
     <message>
         <location filename="../installerprompt.ui" line="525"/>
@@ -57,7 +57,7 @@
     <message>
         <location filename="../installerprompt.ui" line="539"/>
         <source>  Try Lubuntu</source>
-        <translation>  Pruebe lubuntu</translation>
+        <translation>  Pruebe Lubuntu</translation>
     </message>
     <message>
         <location filename="../installerprompt.ui" line="589"/>
