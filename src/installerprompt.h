@@ -47,6 +47,7 @@ private:
     QMap<QString, QString> languageLocaleMap;
     QString selectedLanguage = "English (United States)";
     QString localeName = "en_US";
+    QString getDisplayNameForLocale(const QLocale &locale);
 
     void handleWifiConnection(const QString &ssid, bool recoverFromWrongPassword = false);
     QString promptForWifiPassword(const QString &ssid, bool isWrongPassword = false);

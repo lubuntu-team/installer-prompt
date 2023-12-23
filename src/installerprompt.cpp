@@ -369,6 +369,33 @@ void InstallerPrompt::refreshNetworkList() {
     ui->connectWiFiButton->setVisible(!networks.isEmpty());
 }
 
+QString InstallerPrompt::getDisplayNameForLocale(const QLocale &locale) {
+    auto sanitize = [](QString s) -> QString {
+        s.replace("St.", "Saint", Qt::CaseInsensitive);
+        s.replace("&", "and", Qt::CaseInsensitive);
+        return s;
+    };
+
+    QString nativeName = locale.nativeLanguageName();
+    QString nativeCountryName = sanitize(locale.nativeCountryName());
+    QString englishLanguageName = QLocale::languageToString(locale.language());
+    QString englishCountryName = sanitize(QLocale::countryToString(locale.country()));
+
+    // Rename "American English" to "English"
+    if (locale.language() == QLocale::English) {
+        nativeName = "English";
+        englishLanguageName = "English";
+    }
+
+    QString displayName = nativeName + " (" + nativeCountryName + ")";
+    if (nativeName.compare(englishLanguageName, Qt::CaseInsensitive) != 0 &&
+        nativeCountryName.compare(englishCountryName, Qt::CaseInsensitive) != 0) {
+        displayName += " - " + englishLanguageName + " (" + englishCountryName + ")";
+    }
+
+    return displayName;
+}
+
 void InstallerPrompt::initLanguageComboBox() {
     languageLocaleMap.clear();
     QStringList languages = getAvailableLanguages();
@@ -376,43 +403,30 @@ void InstallerPrompt::initLanguageComboBox() {
         ui->languageComboBox->addItem(language);
     }
 
-    QString defaultLanguage = "English (United States)";
-    int defaultIndex = ui->languageComboBox->findText(defaultLanguage);
+    QLocale currentLocale = QLocale::system();
+    QString currentLocaleDisplayName = getDisplayNameForLocale(currentLocale);
+
+    int defaultIndex = ui->languageComboBox->findText(currentLocaleDisplayName);
     if (defaultIndex != -1) {
         ui->languageComboBox->setCurrentIndex(defaultIndex);
+    } else {
+        // Fallback to English (United States) if current locale is not in the list
+        defaultIndex = ui->languageComboBox->findText("English (United States)");
+        if (defaultIndex != -1) {
+            ui->languageComboBox->setCurrentIndex(defaultIndex);
+        }
     }
 }
 
 QStringList InstallerPrompt::getAvailableLanguages() {
     QMap<QString, QString> languageMap; // Default sorting by QString is case-sensitive
 
-    auto sanitize = [](QString s) -> QString {
-        s.replace("St.", "Saint", Qt::CaseInsensitive);
-        s.replace("&", "and", Qt::CaseInsensitive);
-        return s;
-    };
-
     for (int language = QLocale::C; language <= QLocale::LastLanguage; ++language) {
         foreach (int country, QLocale::countriesForLanguage(static_cast<QLocale::Language>(language))) {
             QLocale locale(static_cast<QLocale::Language>(language), static_cast<QLocale::Country>(country));
-            QString nativeName = locale.nativeLanguageName();
-            if (nativeName.isEmpty()) continue;
 
-            QString nativeCountryName = sanitize(locale.nativeCountryName());
-            QString englishLanguageName = QLocale::languageToString(locale.language());
-            QString englishCountryName = sanitize(QLocale::countryToString(locale.country()));
-
-            // Rename "American English" to "English"
-            if (locale.language() == QLocale::English) {
-                nativeName = "English";
-                englishLanguageName = "English";
-            }
-
-            QString displayName = nativeName + " (" + nativeCountryName + ")";
-            if (nativeName.compare(englishLanguageName, Qt::CaseInsensitive) != 0 &&
-                nativeCountryName.compare(englishCountryName, Qt::CaseInsensitive) != 0) {
-                displayName += " - " + englishLanguageName + " (" + englishCountryName + ")";
-            }
+            QString displayName = getDisplayNameForLocale(locale);
+            if (displayName.isEmpty()) continue;
 
             languageMap.insert(displayName, locale.name());
         }
