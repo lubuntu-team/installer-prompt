@@ -16,11 +16,7 @@ find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core Widgets Network LinguistTools
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Network LinguistTools)
 find_package(KF5 REQUIRED COMPONENTS NetworkManagerQt WidgetsAddons)
 
-set(TS_FILES
-    src/translations/lubuntu-installer-prompt_en_US.ts
-    src/translations/lubuntu-installer-prompt_es_ES.ts
-    src/translations/lubuntu-installer-prompt_zh_CN.ts
-)
+file(GLOB TS_FILES "src/translations/lubuntu-installer-prompt_*.ts")
 
 set(PROJECT_SOURCES
     src/main.cpp
