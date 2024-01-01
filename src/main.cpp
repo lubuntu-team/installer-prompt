@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
     for (QScreen *screen : QApplication::screens()) {
         if (screen == QApplication::primaryScreen()) {
             w = new InstallerPrompt();
+	    w->setGeometry(screen->geometry());
             w->showFullScreen();
             continue;
         }
