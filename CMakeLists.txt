@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(lubuntu-installer-prompt VERSION 1.1.1 LANGUAGES CXX)
+project(lubuntu-installer-prompt VERSION 1.1.2 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
