@@ -52,7 +52,7 @@
     <message>
       <location filename="../installerprompt.ui" line="525"/>
       <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-size:12pt;"&gt;Try Lubuntu without installing it on your system. Allows you to use programs, browse the Web, and even temporarily install apps without modifying your system. Changes made within the live environment will be lost when the computer shuts down.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-      <translation>&lt;html&gt; &lt;head/&gt; &lt;body&gt; &lt;p&gt; &lt;span style = "font-size: 12pt;"&gt; Pruebe lubuntu sin instalarlo en su sistema. Le permite usar programas, navegar por la web e incluso instalar aplicaciones temporalmente sin modificar su sistema. Los cambios realizados en el entorno en vivo se perderán cuando la computadora se apague. &lt;/span&gt; &lt;/p&gt; &lt;/body&gt; &lt;/html&gt;</translation>
+      <translation>&lt;html&gt; &lt;head/&gt; &lt;body&gt; &lt;p&gt; &lt;span style = "font-size: 12pt;"&gt; Pruebe Lubuntu sin instalarlo en su sistema. Le permite usar programas, navegar por la web e incluso instalar aplicaciones temporalmente sin modificar su sistema. Los cambios realizados en el entorno en vivo se perderán cuando la computadora se apague. &lt;/span&gt; &lt;/p&gt; &lt;/body&gt; &lt;/html&gt;</translation>
     </message>
     <message>
       <location filename="../installerprompt.ui" line="539"/>
@@ -62,7 +62,7 @@
     <message>
       <location filename="../installerprompt.ui" line="589"/>
       <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-size:12pt;"&gt;Install Lubuntu onto your system. You can install Lubuntu by itself, or alongside an existing operating system.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-      <translation>&lt;html&gt; &lt;head/&gt; &lt;body&gt; &lt;p&gt; &lt;span style = "font-size: 12pt;"&gt; Instale lubuntu en su sistema. Puede instalar Lubuntu por sí mismo, o junto con un sistema operativo existente. &lt;/span&gt; &lt;/p&gt; &lt;/body&gt; &lt;/html&gt;</translation>
+      <translation>&lt;html&gt; &lt;head/&gt; &lt;body&gt; &lt;p&gt; &lt;span style = "font-size: 12pt;"&gt; Instale Lubuntu en su sistema. Puede instalar Lubuntu por sí mismo, o junto con un sistema operativo existente. &lt;/span&gt; &lt;/p&gt; &lt;/body&gt; &lt;/html&gt;</translation>
     </message>
     <message>
       <location filename="../installerprompt.ui" line="600"/>
