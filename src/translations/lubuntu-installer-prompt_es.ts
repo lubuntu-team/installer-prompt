@@ -1,146 +1,134 @@
-<?xml version="1.0" encoding="UTF-8"?>
+<?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
 <TS version="2.1" language="es">
-  <context>
+<context>
     <name>InstallerPrompt</name>
     <message>
-      <location filename="../installerprompt.ui" line="20"/>
-      <source>Try or Install Lubuntu</source>
-      <translation>Probar o instalar Lubuntu</translation>
+        <location filename="../installerprompt.ui" line="20"/>
+        <source>Try or Install Lubuntu</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="237"/>
-      <source>Select Your Language:</source>
-      <translation>Elige tu idioma:</translation>
+        <location filename="../installerprompt.ui" line="202"/>
+        <source>Select Your Language:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="263"/>
-      <source>✅ Confirm</source>
-      <translation>✅ Confirmar</translation>
+        <location filename="../installerprompt.ui" line="281"/>
+        <source>Internet Connection:</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="280"/>
-      <source>You entered an incorrect password. Please try again.</source>
-      <translation>Ha ingresado una contraseña incorrecta. Intente de nuevo.</translation>
+        <location filename="../installerprompt.ui" line="371"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Try Lubuntu without installing it on your system. Allows you to use programs, browse the Web, and even temporarily install apps without modifying your system. Changes made within the live environment will be lost when the computer shuts down.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="320"/>
-      <source>Select a Wi-Fi Network:</source>
-      <translation>Seleccione una red Wi-Fi:</translation>
+        <location filename="../installerprompt.ui" line="389"/>
+        <source>  Try Lubuntu</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.cpp" line="205"/>
-      <source>Connect</source>
-      <translation>Conectar</translation>
+        <location filename="../installerprompt.ui" line="438"/>
+        <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Install Lubuntu onto your system. You can install Lubuntu by itself, or alongside an existing operating system.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="380"/>
-      <source>(For advanced network configuration, select "Try Lubuntu")</source>
-      <translation>(Para la configuración de red avanzada, seleccione "Probar Lubuntu")</translation>
+        <location filename="../installerprompt.ui" line="453"/>
+        <source>  Install Lubuntu</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="419"/>
-      <source>✅ Connect</source>
-      <translation>✅ Conectar</translation>
+        <location filename="../installerprompt.cpp" line="68"/>
+        <location filename="../installerprompt.cpp" line="175"/>
+        <location filename="../installerprompt.cpp" line="226"/>
+        <location filename="../installerprompt.cpp" line="300"/>
+        <location filename="../installerprompt.cpp" line="345"/>
+        <source>Error</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="433"/>
-      <location filename="../installerprompt.cpp" line="475"/>
-      <source>Changing language...</source>
-      <translation>Cambiando idioma...</translation>
+        <location filename="../installerprompt.cpp" line="68"/>
+        <source>Background image cannot be loaded.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="525"/>
-      <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-size:12pt;"&gt;Try Lubuntu without installing it on your system. Allows you to use programs, browse the Web, and even temporarily install apps without modifying your system. Changes made within the live environment will be lost when the computer shuts down.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-      <translation>&lt;html&gt; &lt;head/&gt; &lt;body&gt; &lt;p&gt; &lt;span style = "font-size: 12pt;"&gt; Pruebe Lubuntu sin instalarlo en su sistema. Le permite usar programas, navegar por la web e incluso instalar aplicaciones temporalmente sin modificar su sistema. Los cambios realizados en el entorno en vivo se perderán cuando la computadora se apague. &lt;/span&gt; &lt;/p&gt; &lt;/body&gt; &lt;/html&gt;</translation>
+        <location filename="../installerprompt.cpp" line="175"/>
+        <source>Selected Ethernet device has no network!</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="539"/>
-      <source>  Try Lubuntu</source>
-      <translation>  Probar Lubuntu</translation>
+        <location filename="../installerprompt.cpp" line="226"/>
+        <source>Failed to add WiFi connection.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="589"/>
-      <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=" font-size:12pt;"&gt;Install Lubuntu onto your system. You can install Lubuntu by itself, or alongside an existing operating system.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-      <translation>&lt;html&gt; &lt;head/&gt; &lt;body&gt; &lt;p&gt; &lt;span style = "font-size: 12pt;"&gt; Instale Lubuntu en su sistema. Puede instalar Lubuntu por sí mismo, o junto con un sistema operativo existente. &lt;/span&gt; &lt;/p&gt; &lt;/body&gt; &lt;/html&gt;</translation>
+        <location filename="../installerprompt.cpp" line="251"/>
+        <location filename="../installerprompt.cpp" line="275"/>
+        <source>Connected</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.ui" line="600"/>
-      <source>  Install Lubuntu</source>
-      <translation>  Instalar Lubuntu</translation>
+        <location filename="../installerprompt.cpp" line="251"/>
+        <location filename="../installerprompt.cpp" line="275"/>
+        <source>Disconnected</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.cpp" line="49"/>
-      <location filename="../installerprompt.cpp" line="256"/>
-      <location filename="../installerprompt.cpp" line="271"/>
-      <source>Error</source>
-      <translation>Error</translation>
+        <location filename="../installerprompt.cpp" line="255"/>
+        <source>Ethernet %1: %2</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.cpp" line="49"/>
-      <source>Background image cannot be loaded.</source>
-      <translation>La imagen de fondo no se puede cargar.</translation>
+        <location filename="../installerprompt.cpp" line="279"/>
+        <source>WiFi %1: %2</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.cpp" line="108"/>
-      <source>Not Connected</source>
-      <translation>No Conectado</translation>
+        <location filename="../installerprompt.cpp" line="300"/>
+        <source>WiFi password was incorrect.</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.cpp" line="194"/>
-      <source>Wi-Fi Password Required</source>
-      <translation>Se requiere contraseña de Wi-Fi</translation>
+        <location filename="../installerprompt.cpp" line="345"/>
+        <source>Something has gone very wrong trying to parse the list of supported languages!</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>LanguageChangeDialog</name>
+    <message>
+        <location filename="../languagechangedialog.ui" line="14"/>
+        <source>Lubuntu</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.cpp" line="203"/>
-      <source>Enter password for "%1":</source>
-      <translation>Ingrese la contraseña para "%1":</translation>
+        <location filename="../languagechangedialog.ui" line="24"/>
+        <source>Changing language...</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
+    <name>WifiPasswordDialog</name>
+    <message>
+        <location filename="../wifipassworddialog.ui" line="14"/>
+        <source>Dialog</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.cpp" line="256"/>
-      <source>Failed to create Wi-Fi settings.</source>
-      <translation>No se pudo crear la configuración de Wi-Fi.</translation>
+        <location filename="../wifipassworddialog.ui" line="72"/>
+        <source>wifilabel</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.cpp" line="271"/>
-      <source>Failed to add Wi-Fi connection.</source>
-      <translation>No se pudo agregar la conexión Wi-Fi.</translation>
+        <location filename="../wifipassworddialog.ui" line="102"/>
+        <source>Connect</source>
+        <translation type="unfinished"></translation>
     </message>
     <message>
-      <location filename="../installerprompt.cpp" line="472"/>
-      <source>Unable to download full language support, changing anyway...</source>
-      <translation>No se puede descargar el soporte completo de idiomas, cambiando de todos modos...</translation>
+        <location filename="../wifipassworddialog.cpp" line="9"/>
+        <source>Enter password for %1:</source>
+        <translation type="unfinished"></translation>
     </message>
-    <message>
-      <location filename="../installerprompt.ui" line="727"/>
-      <location filename="../installerprompt.cpp" line="114"/>
-      <source>Connected</source>
-      <translation>Conectado</translation>
-    </message>
-    <message>
-      <location filename="../installerprompt.cpp" line="119"/>
-      <source>Connecting...</source>
-      <translation>Conectando...</translation>
-    </message>
-    <message>
-      <location filename="../installerprompt.cpp" line="124"/>
-      <source>Disconnecting...</source>
-      <translation>Desconectando...</translation>
-    </message>
-    <message>
-      <location filename="../installerprompt.cpp" line="130"/>
-      <source>Unknown Status</source>
-      <translation>Estado Desconocido</translation>
-    </message>
-    <message>
-      <location filename="../installerprompt.cpp" line="330"/>
-      <source>WiFi Not Available</source>
-      <translation>Wifi No Disponible</translation>
-    </message>
-    <message>
-      <location filename="../installerprompt.cpp" line="330"/>
-      <source>No WiFi devices were found on this system.</source>
-      <translation>No se encontraron dispositivos WiFi en este sistema.</translation>
-    </message>
-  </context>
+</context>
 </TS>

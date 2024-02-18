@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2022-2023 Lubuntu Developers <lubuntu-devel@lists.ubuntu.com>
+ * Copyright (C) 2024      Kubuntu Developers <kubuntu-devel@lists.ubuntu.com>
  * Authored by: Simon Quigley <tsimonq2@lubuntu.me>
  *              Aaron Rainbolt <arraybolt3@lubuntu.me>
  *
@@ -13,8 +14,6 @@
  * GNU General Public License for more details.
  */
 
-#include <KBusyIndicatorWidget>
-#include <KLed>
 #include <NetworkManagerQt/ConnectionSettings>
 #include <NetworkManagerQt/Manager>
 #include <NetworkManagerQt/Device>
@@ -27,10 +26,14 @@
 #include <NetworkManagerQt/Settings>
 #include <QProcess>
 #include <QScreen>
+#include <QTimer>
+#include <QFile>
 #include <QMessageBox>
 #include <QUuid>
 #include <QDBusPendingReply>
 #include "installerprompt.h"
+#include "wifipassworddialog.h"
+#include "languagechangedialog.h"
 #include "./ui_installerprompt.h"
 
 InstallerPrompt::InstallerPrompt(QWidget *parent)
@@ -38,137 +41,263 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     , ui(new Ui::InstallerPrompt) {
     ui->setupUi(this);
 
-    // Hide the Incorrect Password and loading text
-    ui->incorrectPassword->setVisible(false);
-    ui->changingLanguageLabel->setVisible(false);
-    ui->changingLanguageLoader->setVisible(false);
+    updateConnectionInfo();
 
+    initLanguageComboBox();
+
+    connect(ui->tryLubuntu, &QPushButton::clicked, this, &InstallerPrompt::onTryClicked);
+    connect(ui->installLubuntu, &QPushButton::clicked, this, &InstallerPrompt::onInstallClicked);
+    connect(ui->languageComboBox, SIGNAL(activated(int)), this, SLOT(onLanguageSelected(int)));
+    connect(ui->networkComboBox, SIGNAL(activated(int)), this, SLOT(onNetworkSelected(int)));
+
+    QTimer *repeater = new QTimer();
+    connect(repeater, SIGNAL(timeout()), this, SLOT(updateConnectionInfo()));
+    repeater->start(15000);
+}
+
+InstallerPrompt::~InstallerPrompt()
+{
+
+}
+
+void InstallerPrompt::activateBackground()
+{
     // Set the background image and scale it
-    QPixmap bg(":/background");
-    if (bg.isNull()) {
+    QImage image(":/background");
+    if (image.isNull()) {
         QMessageBox::warning(this, tr("Error"), tr("Background image cannot be loaded."));
         return;
     }
 
-    QScreen *screen = QGuiApplication::primaryScreen();
-    QRect screenGeometry = screen->geometry();
-    bg = bg.scaled(screenGeometry.size(), Qt::IgnoreAspectRatio);
-    
+    qreal imgRatio = static_cast<qreal>(image.width()) / image.height();
+    qreal screenRatio = static_cast<qreal>(this->width()) / this->height();
+    QImage scaled;
+    if (imgRatio < screenRatio) {
+        scaled = image.scaledToWidth(this->width(), Qt::SmoothTransformation);
+        int yGap = (scaled.height() - this->height()) / 2;
+        scaled = scaled.copy(0, yGap, scaled.width(), this->height());
+    } else {
+        scaled = image.scaledToHeight(this->height(), Qt::SmoothTransformation);
+        int xGap = (scaled.width() - this->width()) / 2;
+        scaled = scaled.copy(xGap, 0, this->width(), scaled.height());
+    }
+    QPixmap bg = QPixmap::fromImage(scaled);
     QPalette palette;
     palette.setBrush(QPalette::Window, bg);
     this->setPalette(palette);
-
-    // Initialize process for external app launch
-    process = new QProcess(this);
-
-    // Set up signal-slot connections for buttons
-    connect(ui->tryLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::tryLubuntu);
-    connect(ui->installLubuntu, &QAbstractButton::clicked, this, &InstallerPrompt::installLubuntu);
-    connect(ui->connectWiFiButton, &QAbstractButton::clicked, this, &InstallerPrompt::onConnectWifiClicked);
-    connect(ui->confirmButton, &QAbstractButton::clicked, this, &InstallerPrompt::onLanguageConfirm);
-
-    // Set up the language combo box with available languages
-    initLanguageComboBox();
-
-    // Connect the appropriate language slots
-    connect(ui->languageComboBox, SIGNAL(currentIndexChanged(int)), this, SLOT(onLanguageChanged(int)));
-
-    // Check initial network status and update UI
-    updateConnectionStatus();
-
-    // Find and store the Wi-Fi device
-    foreach (const NetworkManager::Device::Ptr &device, NetworkManager::networkInterfaces()) {
-        if (device->type() == NetworkManager::Device::Wifi) {
-            wifiDevice = device.objectCast<NetworkManager::WirelessDevice>();
-            connect(wifiDevice.data(), &NetworkManager::Device::stateChanged, this, &InstallerPrompt::handleWiFiConnectionChange);
-            break;
-        }
-    }
-
-    // Set up network manager signals for dynamic updates
-    auto nm = NetworkManager::notifier();
-    connect(nm, &NetworkManager::Notifier::deviceAdded, this, &InstallerPrompt::updateConnectionStatus);
-    connect(nm, &NetworkManager::Notifier::deviceRemoved, this, &InstallerPrompt::updateConnectionStatus);
-    connect(nm, &NetworkManager::Notifier::activeConnectionsChanged, this, &InstallerPrompt::updateConnectionStatus);
-    connect(nm, &NetworkManager::Notifier::wirelessEnabledChanged, this, &InstallerPrompt::updateConnectionStatus);
-    connect(nm, &NetworkManager::Notifier::activeConnectionAdded, this, &InstallerPrompt::updateConnectionStatus);
-    connect(nm, &NetworkManager::Notifier::connectivityChanged, this, &InstallerPrompt::updateConnectionStatus);
-    connect(nm, &NetworkManager::Notifier::primaryConnectionChanged, this, &InstallerPrompt::updateConnectionStatus);
 }
 
-void InstallerPrompt::updateConnectionStatus() {
-    auto status = NetworkManager::status();
-    bool online = false;
-    QString statusText;
+void InstallerPrompt::onTryClicked()
+{
+    QApplication::quit();
+}
 
-    switch (status) {
-        case NetworkManager::Status::Disconnected:
-        case NetworkManager::ConnectedLinkLocal:
-        case NetworkManager::Asleep:
-            statusText = tr("Not Connected");
-            ui->connectionLED->setColor(Qt::red);
-            ui->connectionLED->setState(KLed::Off);
-            break;
-        case NetworkManager::Status::Connected:
-            online = true;
-            statusText = tr("Connected");
-            ui->connectionLED->setColor(Qt::green);
-            ui->connectionLED->setState(KLed::On);
-            break;
-        case NetworkManager::Status::Connecting:
-            statusText = tr("Connecting...");
-            ui->connectionLED->setColor(Qt::yellow);
-            ui->connectionLED->setState(KLed::On);
-            break;
-        case NetworkManager::Status::Disconnecting:
-            statusText = tr("Disconnecting...");
-            ui->connectionLED->setColor(Qt::yellow);
-            ui->connectionLED->setState(KLed::On);
-            break;
-        default:
-            qDebug() << "Unknown status:" << status;
-            statusText = tr("Unknown Status");
-            ui->connectionLED->setColor(Qt::gray);
-            ui->connectionLED->setState(KLed::Off);
-            break;
+void InstallerPrompt::onInstallClicked()
+{
+    ui->tryLubuntu->setEnabled(false);
+    ui->installLubuntu->setEnabled(false);
+    ui->tryLubuntu->setToolTip("");
+    ui->installLubuntu->setToolTip("");
+    ui->languageComboBox->setEnabled(false);
+    QProcess *calamares = new QProcess(this);
+    calamares->setProgram("/usr/bin/sudo");
+    calamares->setArguments(QStringList() << "-E" << "calamares" << "-D8");
+    calamares->start();
+
+    // If Calamares exits, it either crashed or the user cancelled the installation. Exit the installer prompt (and start LXQt).
+    connect(calamares, SIGNAL(finished(int)), this, SLOT(onTryClicked()));
+}
+
+void InstallerPrompt::onLanguageSelected(int index)
+{
+    QString selectedLanguage = ui->languageComboBox->itemText(index);
+    QString localeName = languageLocaleMap.value(selectedLanguage);
+    qDebug() << selectedLanguage << localeName;
+
+    // Split the locale name to get language and country code
+    QStringList localeParts = localeName.split('_');
+    QString languageCode = localeParts.value(0);
+    QString countryCode = localeParts.value(1);
+
+    // If there is no internet connection and we don't ship the langpack, tell them
+    QStringList allowedLanguages = {"zh-hans", "hi", "es", "fr", "ar", "en"};
+
+    bool only_lxqt = false;
+    if (!allowedLanguages.contains(languageCode) && NetworkManager::status() != NetworkManager::Status::Connected) {
+        only_lxqt = true;
     }
 
-    ui->connectionStatusLabel->setText(statusText);
- 
-    const auto devices = NetworkManager::networkInterfaces();
-    bool wifiEnabled = false;
+    // Some of the LibreOffice language packs need special-casing, do that here
+    QString libreOfficeLang;
+    if (localeParts[0] == "zh") {
+        libreOfficeLang = (countryCode == "CN" || countryCode == "SG" || countryCode == "MY") ? "zh-cn" : "zh-tw";
+    } else {
+        static const QMap<QString, QString> localeMap = {
+            {"en_GB", "en-gb"}, {"en_ZA", "en-za"}, {"pa_IN", "pa-in"}, {"pt_BR", "pt-br"}
+        };
+        libreOfficeLang = localeMap.value(localeParts.join('_'), languageCode);
+    }
+
+    // Construct the command to run the script with parameters
+    QProcess *process = new QProcess(this);
+    QStringList arguments;
+
+    process->setProgram("sudo");
+    arguments << "/usr/libexec/change-system-language" << languageCode << countryCode << libreOfficeLang;
+    if (only_lxqt) arguments << "1";
+    process->setArguments(arguments);
+
+    connect(process, &QProcess::errorOccurred, this, &InstallerPrompt::languageProcessError);
+    process->start();
+
+    LanguageChangeDialog lcd;
+    lcd.exec();
+}
+
+void InstallerPrompt::languageProcessError(QProcess::ProcessError error) {
+    qDebug() << "Process failed with error:" << error;
+}
+
+void InstallerPrompt::onNetworkSelected(int index)
+{
+    QString networkId = ui->networkComboBox->itemData(index).toString();
+    if (!networkId.isNull()) {
+        if (networkId.left(4) == "UNI_") { // this is an Ethernet device
+            QString deviceUni = networkId.right(networkId.count() - 4);
+            NetworkManager::WiredDevice wiredDevice(deviceUni);
+            QDBusPendingReply reply = wiredDevice.disconnectInterface();
+            reply.waitForFinished();
+
+            NetworkManager::Connection::List availableConnections = wiredDevice.availableConnections();
+            if (availableConnections.count() > 0) {
+                NetworkManager::activateConnection(availableConnections[0]->path(), wiredDevice.uni(), QString());
+            } else {
+                QMessageBox::warning(this, tr("Error"), tr("Selected Ethernet device has no network!"));
+            }
+        } else { // this is a Wifi connection
+            wifiSsid = networkId.right(networkId.length() - 4);
+            QDBusPendingReply reply = wifiDevice->disconnectInterface();
+            reply.waitForFinished();
+            NetworkManager::Connection::Ptr targetConnection;
+            foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
+                if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
+                    auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
+                    if (wirelessSetting && wirelessSetting->ssid() == wifiSsid) {
+                        targetConnection = connection;
+                    }
+                }
+            }
+            if (targetConnection) {
+                NetworkManager::activateConnection(targetConnection->path(), wifiDevice->uni(), QString());
+            } else {
+                WifiPasswordDialog wpd(wifiSsid);
+                wpd.exec();
+                QString password = wpd.getPassword();
+                if (password.isEmpty()) {
+                    return;
+                }
+
+                NMVariantMapMap wifiSettings;
+                if (!wifiDevice) {
+                    qWarning() << "WiFi device not found. Unable to set interface name.";
+                    return;
+                }
+                NetworkManager::ConnectionSettings::Ptr newConnectionSettings(new NetworkManager::ConnectionSettings(NetworkManager::ConnectionSettings::Wireless));
+                newConnectionSettings->setId(wifiSsid);
+                newConnectionSettings->setUuid(NetworkManager::ConnectionSettings::createNewUuid());
+                newConnectionSettings->setInterfaceName(wifiDevice->interfaceName());
+                QVariantMap wirelessSetting;
+                wirelessSetting.insert("ssid", wifiSsid.toUtf8());
+                wifiSettings.insert("802-11-wireless", wirelessSetting);
+                const auto settingsMap = newConnectionSettings->toMap();
+                for (const auto &key : settingsMap.keys()) {
+                    QVariant value = settingsMap.value(key);
+                    wifiSettings.insert(key, value.toMap());
+                }
+
+                QVariantMap wirelessSecurity;
+                wirelessSecurity["key-mgmt"] = "wpa-psk";
+                wirelessSecurity["psk"] = password;
+                wifiSettings["802-11-wireless-security"] = wirelessSecurity;
+
+                QDBusPendingReply<QDBusObjectPath> reply = NetworkManager::addConnection(wifiSettings);
+                reply.waitForFinished();
+                if (reply.isError()) {
+                    QMessageBox::warning(this, tr("Error"), tr("Failed to add WiFi connection."));
+                    return;
+                }
+
+                QDBusObjectPath path = reply.value();
+                NetworkManager::activateConnection(path.path(), wifiDevice->uni(), QString());
+            }
+        }
+    }
+}
+
+void InstallerPrompt::updateConnectionInfo()
+{
+    ui->networkComboBox->clear();
+    int ethDevices = 0;
+    int connectedDevice = 0;
+    bool hitConnectedNetwork = false;
     if (NetworkManager::isNetworkingEnabled()) {
-      for (const auto &device : devices) {
-          if (device->type() == NetworkManager::Device::Wifi && NetworkManager::isWirelessEnabled()) wifiEnabled = true;
-      }
+        for (const auto &device : NetworkManager::networkInterfaces()) {
+            if (device->type() == NetworkManager::Device::Ethernet) {
+                ethDevices++;
+                bool isDeviceConnected = device->state() == NetworkManager::Device::Activated;
+                if (isDeviceConnected) {
+                    hitConnectedNetwork = true;
+                }
+                QString isConnected = isDeviceConnected ? tr("Connected") : tr("Disconnected");
+                if (!hitConnectedNetwork) {
+                    connectedDevice++;
+                }
+                ui->networkComboBox->addItem(tr("Ethernet %1: %2").arg(ethDevices).arg(isConnected), QString("UNI_") + device->uni());
+            } else if (device->type() == NetworkManager::Device::Wifi && NetworkManager::isWirelessEnabled() && !hitWifiDevice) {
+                hitWifiDevice = true;
+                wifiDevice = device.staticCast<NetworkManager::WirelessDevice>();
+                connect(wifiDevice.data(), &NetworkManager::Device::stateChanged, this, &InstallerPrompt::handleWiFiConnectionChange);
+            }
+        }
+        if (hitWifiDevice) {
+            NetworkManager::ActiveConnection::Ptr activeConnection = wifiDevice->activeConnection();
+            NetworkManager::Connection::Ptr underlyingActiveConnection = activeConnection->connection();
+            for (const auto &network : wifiDevice->networks()) {
+                QString ssid = network->ssid();
+                bool isNetworkConnected = false;
+                if (activeConnection->state() == NetworkManager::ActiveConnection::Activated) {
+                    NetworkManager::WirelessSetting::Ptr underlyingWirelessSetting = underlyingActiveConnection->settings()->setting(NetworkManager::Setting::Wireless).staticCast<NetworkManager::WirelessSetting>();
+                    if (network->ssid() == QString(underlyingWirelessSetting->ssid())) {
+                        isNetworkConnected = true;
+                        hitConnectedNetwork = true;
+                    }
+                }
+                QString isConnected = isNetworkConnected ? tr("Connected") : tr("Disconnected");
+                if (!hitConnectedNetwork) {
+                    connectedDevice++;
+                }
+                ui->networkComboBox->addItem(tr("WiFi %1: %2").arg(ssid).arg(isConnected), QString("SSID") + ssid);
+            }
+        }
     }
-
-    bool connectable = !online && wifiEnabled;
-    if (connectable) refreshNetworkList();
-
-    ui->connectWiFiButton->setVisible(connectable);
-    ui->WiFiLabel->setVisible(connectable);
-    ui->networkComboBox->setVisible(connectable);
-    ui->WiFiInfoLabel->setVisible(connectable);
-    ui->WiFiSpacer->changeSize(connectable ? 40 : 0, connectable ? 20 : 0, QSizePolicy::Fixed, QSizePolicy::Fixed);
+    if (hitConnectedNetwork) {
+        ui->networkComboBox->setCurrentIndex(connectedDevice);
+    }
 }
 
 void InstallerPrompt::handleWiFiConnectionChange(NetworkManager::Device::State newstate, NetworkManager::Device::State oldstate, NetworkManager::Device::StateChangeReason reason)
 {
-    QMutexLocker locker(&wifiChangeMutex);
     if (reason == NetworkManager::Device::NoSecretsReason && !wifiWrongHandling) {
         wifiWrongHandling = true;
-        qDebug() << wifiSSID;
-        
+
         foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
             if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
                 auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
-                if (wirelessSetting && wirelessSetting->ssid() == wifiSSID) {
-                    qDebug() << "Wiping connection with wrong password: " << wifiSSID;
-                    // Show the Incorrect Password text
-                    ui->incorrectPassword->setVisible(true);
+                if (wirelessSetting && wirelessSetting->ssid() == wifiSsid) {
+                    qDebug() << "Wiping connection with wrong password: " << wifiSsid;
                     QDBusPendingReply removeReply = connection->remove();
                     removeReply.waitForFinished();
+                    QMessageBox::warning(this, tr("Error"), tr("WiFi password was incorrect."));
                 }
             }
         }
@@ -176,197 +305,77 @@ void InstallerPrompt::handleWiFiConnectionChange(NetworkManager::Device::State n
     }
 }
 
-NetworkManager::Connection::Ptr InstallerPrompt::findConnectionBySsid(const QString &ssid) {
-    foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
-        if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
-            auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
-            if (wirelessSetting && wirelessSetting->ssid() == ssid) {
-                return connection;
-            }
+void InstallerPrompt::initLanguageComboBox() {
+    languageLocaleMap.clear();
+    QStringList languages = getAvailableLanguages();
+    for (const auto &language : languages) {
+        ui->languageComboBox->addItem(language);
+    }
+
+    QLocale currentLocale = QLocale::system();
+    QString currentLocaleDisplayName = getDisplayNameForLocale(currentLocale);
+
+    int defaultIndex = ui->languageComboBox->findText(currentLocaleDisplayName);
+    if (defaultIndex != -1) {
+        ui->languageComboBox->setCurrentIndex(defaultIndex);
+    } else {
+        // Fallback to English (United States) if current locale is not in the list
+        defaultIndex = ui->languageComboBox->findText("English (United States)");
+        if (defaultIndex != -1) {
+            ui->languageComboBox->setCurrentIndex(defaultIndex);
         }
     }
-    return NetworkManager::Connection::Ptr(); // Return null pointer if not found
 }
 
-QString InstallerPrompt::promptForWifiPassword(const QString &ssid, bool isWrongPassword) {
-    QDialog passwordDialog(this);
-    passwordDialog.setModal(true);
-    passwordDialog.setWindowTitle(tr("Wi-Fi Password Required"));
-    passwordDialog.setWindowIcon(QIcon::fromTheme("network-wireless"));
-    passwordDialog.setStyleSheet("QLabel { color: black; } ");
-    passwordDialog.setMinimumWidth(250);
-    passwordDialog.setMinimumHeight(120);
-    passwordDialog.setMaximumWidth(5000);
-    passwordDialog.setMaximumHeight(500);
+QStringList InstallerPrompt::getAvailableLanguages() {
+    QMap<QString, QString> language_map; // Default sorting by QString is case-sensitive
+    QStringList supported_languages;
 
-    QVBoxLayout layout;
-    QLabel passwordLabel(tr("Enter password for \"%1\":").arg(ssid), &passwordDialog);
-    QLineEdit passwordLineEdit(&passwordDialog);
-    QPushButton passwordButton(tr("Connect"), &passwordDialog);
+    QFile supported_locale_file("/usr/share/i18n/SUPPORTED");
+    char lineBuf[2048];
+    if (supported_locale_file.open(QFile::ReadOnly)) {
+        while (!supported_locale_file.atEnd()) {
+            supported_locale_file.readLine(lineBuf, 2048);
+            QString line(lineBuf);
+            if (!line.contains("UTF-8")) continue;
+            QStringList lineParts = line.split('.');
+            if (lineParts.count() == 1) {
+                lineParts = line.split(' ');
+                if (lineParts.count() == 1) {
+                    QMessageBox::warning(this, tr("Error"), tr("Something has gone very wrong trying to parse the list of supported languages!"));
+                }
+            }
+            supported_languages.append(lineParts[0]);
+        }
+        supported_locale_file.close();
+    }
 
-    passwordLineEdit.setEchoMode(QLineEdit::Password);
-    layout.addWidget(&passwordLabel);
-    layout.addWidget(&passwordLineEdit);
-    layout.addWidget(&passwordButton);
+    QList<QLocale> all_locales = QLocale::matchingLocales(QLocale::AnyLanguage, QLocale::AnyScript, QLocale::AnyCountry);
+    for (const QLocale &locale : all_locales) {
+        QString check_locale_name = locale.name();
+        if (check_locale_name.contains(".UTF-8")) {
+            check_locale_name = check_locale_name.left(check_locale_name.length() - 6);
+        }
+        if (!supported_languages.contains(check_locale_name)) continue;
+        QString display_name = getDisplayNameForLocale(locale);
+        if (display_name.isEmpty()) continue;
 
-    passwordDialog.setLayout(&layout);
+        language_map.insert(display_name, locale.name());
+    }
 
-    // Connect with a lambda function for inline validation
-    connect(&passwordLineEdit, &QLineEdit::textChanged, this, [&passwordLineEdit](const QString &text) {
-        int minLength = 8;
-        int maxLength = 64;
-        bool isValid = text.length() >= minLength && text.length() <= maxLength;
-        passwordLineEdit.setStyleSheet(isValid ? "" : "border: 1px solid red;");
+    // Sort the language display names
+    QStringList sorted_languages = language_map.keys();
+    std::sort(sorted_languages.begin(), sorted_languages.end(), [](const QString &a, const QString &b) {
+        return a.compare(b, Qt::CaseInsensitive) < 0;
     });
 
-    connect(&passwordButton, &QPushButton::clicked, &passwordDialog, &QDialog::accept);
-
-    if (passwordDialog.exec() == QDialog::Accepted) {
-        return passwordLineEdit.text();
+    // Clear the existing languageLocaleMap and repopulate it based on sortedLanguages
+    languageLocaleMap.clear();
+    for (const QString &language_name : sorted_languages) {
+        languageLocaleMap.insert(language_name, language_map[language_name]);
     }
 
-    return QString();
-}
-
-void InstallerPrompt::handleWifiConnection(const QString &ssid, bool recoverFromWrongPassword) {
-    ui->incorrectPassword->setVisible(false);
-    ui->networkComboBox->setEnabled(false);
-    wifiSSID = ssid;
-    qDebug() << "Attempting to find connection for SSID:" << ssid;
-
-    // Check for existing connection
-    NetworkManager::Connection::Ptr connection = findConnectionBySsid(ssid);
-    if (connection && !recoverFromWrongPassword) {
-        qDebug() << "Using existing connection for:" << ssid;
-        NetworkManager::activateConnection(connection->path(), wifiDevice->uni(), QString());
-        ui->networkComboBox->setEnabled(true);
-        return;
-    }
-
-    // Prompt for Wi-Fi password
-    QString password = promptForWifiPassword(ssid);
-    if (password.isEmpty()) {
-        ui->networkComboBox->setEnabled(true);
-        return;
-    }
-
-    // Create new Wi-Fi connection
-    NMVariantMapMap settings = createSettingsBySSID(ssid);
-    if (settings.isEmpty()) {
-        QMessageBox::warning(this, tr("Error"), tr("Failed to create Wi-Fi settings."));
-        ui->networkComboBox->setEnabled(true);
-        return;
-    }
-
-    // Update the wireless security settings
-    QVariantMap wirelessSecurity;
-    wirelessSecurity["key-mgmt"] = "wpa-psk";
-    wirelessSecurity["psk"] = password;
-    settings["802-11-wireless-security"] = wirelessSecurity;
-
-    // Add the new connection
-    QDBusPendingReply<QDBusObjectPath> reply = NetworkManager::addConnection(settings);
-    reply.waitForFinished();
-    if (reply.isError()) {
-        QMessageBox::warning(this, tr("Error"), tr("Failed to add Wi-Fi connection."));
-        ui->networkComboBox->setEnabled(true);
-        return;
-    }
-
-    // Activate the new connection
-    QDBusObjectPath path = reply.value();
-    NetworkManager::activateConnection(path.path(), wifiDevice->uni(), QString());
-    ui->networkComboBox->setEnabled(true);
-}
-
-NMVariantMapMap InstallerPrompt::createSettingsBySSID(const QString &ssid) {
-    NMVariantMapMap convertedSettings;
-
-    if (!wifiDevice) {
-        qWarning() << "Wi-Fi device not found. Unable to set interface name.";
-        return convertedSettings;
-    }
-
-    NetworkManager::ConnectionSettings::Ptr newConnectionSettings(new NetworkManager::ConnectionSettings(NetworkManager::ConnectionSettings::Wireless));
-    newConnectionSettings->setId(ssid);
-    newConnectionSettings->setUuid(NetworkManager::ConnectionSettings::createNewUuid());
-    newConnectionSettings->setInterfaceName(wifiDevice->interfaceName());
-
-    // Configure wireless settings
-    QVariantMap wirelessSetting;
-    wirelessSetting.insert("ssid", ssid.toUtf8());
-    convertedSettings.insert("802-11-wireless", wirelessSetting);
-
-    // Convert other settings
-    const auto settingsMap = newConnectionSettings->toMap();
-    for (const auto &key : settingsMap.keys()) {
-        QVariant value = settingsMap.value(key);
-        convertedSettings.insert(key, value.toMap());
-    }
-
-    return convertedSettings;
-}
-
-void InstallerPrompt::onConnectWifiClicked() {
-    QString selectedSSID = ui->networkComboBox->currentText();
-    handleWifiConnection(selectedSSID);
-}
-
-void InstallerPrompt::showWifiOptions() {
-    bool foundWifiDevice = false;
-    for (const NetworkManager::Device::Ptr &device : NetworkManager::networkInterfaces()) {
-        if (device->type() == NetworkManager::Device::Wifi) {
-            foundWifiDevice = true;
-            auto wifiDevice = device.staticCast<NetworkManager::WirelessDevice>();
-            ui->networkComboBox->clear();  // Use the combo box from the UI file, clear existing items
-            for (const NetworkManager::WirelessNetwork::Ptr &network : wifiDevice->networks()) {
-                ui->networkComboBox->addItem(network->ssid());  // Add Wi-Fi networks to the combo box
-            }
-            break;  // Handle the first Wi-Fi device
-        }
-    }
-
-    if (!foundWifiDevice) {
-        QMessageBox::information(this, tr("WiFi Not Available"), tr("No WiFi devices were found on this system."));
-    }
-}
-
-void InstallerPrompt::refreshNetworkList() {
-    NetworkManager::WirelessDevice::Ptr wirelessDevice;
-
-    // Iterate over network interfaces to find a wireless device
-    const auto devices = NetworkManager::networkInterfaces();
-    for (const auto &device : devices) {
-        if (device->type() == NetworkManager::Device::Wifi) {
-            wirelessDevice = device.staticCast<NetworkManager::WirelessDevice>();
-            break; // Break after finding the first wireless device
-        }
-    }
-
-    if (!wirelessDevice) {
-        // No wireless device found, handle appropriately
-        ui->networkComboBox->setVisible(false);
-        ui->connectWiFiButton->setVisible(false);
-        return;
-    }
-
-    QMap<QString, NetworkManager::WirelessNetwork::Ptr> tempWifiNetworkMap;
-    QStringList ssidList;
-
-    const auto networks = wirelessDevice->networks();
-    for (const auto &network : networks) {
-        QString ssid = network->ssid();
-        tempWifiNetworkMap[ssid] = network;
-        ssidList.append(ssid);
-    }
-
-    // Update the main map and combo box only after the new list is ready
-    ui->networkComboBox->clear();
-    ui->networkComboBox->addItems(ssidList);
-
-    // Adjust visibility
-    ui->networkComboBox->setVisible(!networks.isEmpty());
-    ui->connectWiFiButton->setVisible(!networks.isEmpty());
+    return sorted_languages;
 }
 
 QString InstallerPrompt::getDisplayNameForLocale(const QLocale &locale) {
@@ -399,143 +408,4 @@ QString InstallerPrompt::getDisplayNameForLocale(const QLocale &locale) {
     }
 
     return displayName;
-}
-
-void InstallerPrompt::initLanguageComboBox() {
-    languageLocaleMap.clear();
-    QStringList languages = getAvailableLanguages();
-    for (const auto &language : languages) {
-        ui->languageComboBox->addItem(language);
-    }
-
-    QLocale currentLocale = QLocale::system();
-    QString currentLocaleDisplayName = getDisplayNameForLocale(currentLocale);
-
-    int defaultIndex = ui->languageComboBox->findText(currentLocaleDisplayName);
-    if (defaultIndex != -1) {
-        ui->languageComboBox->setCurrentIndex(defaultIndex);
-    } else {
-        // Fallback to English (United States) if current locale is not in the list
-        defaultIndex = ui->languageComboBox->findText("English (United States)");
-        if (defaultIndex != -1) {
-            ui->languageComboBox->setCurrentIndex(defaultIndex);
-        }
-    }
-}
-
-QStringList InstallerPrompt::getAvailableLanguages() {
-    QMap<QString, QString> language_map; // Default sorting by QString is case-sensitive
-
-    QList<QLocale> all_locales = QLocale::matchingLocales(QLocale::AnyLanguage, QLocale::AnyScript, QLocale::AnyCountry);
-    for (const QLocale &locale : all_locales) {
-        QString display_name = getDisplayNameForLocale(locale);
-        if (display_name.isEmpty()) continue;
-
-        language_map.insert(display_name, locale.name());
-    }
-
-    // Sort the language display names
-    QStringList sorted_languages = language_map.keys();
-    std::sort(sorted_languages.begin(), sorted_languages.end(), [](const QString &a, const QString &b) {
-        return a.compare(b, Qt::CaseInsensitive) < 0;
-    });
-
-    // Clear the existing languageLocaleMap and repopulate it based on sortedLanguages
-    languageLocaleMap.clear();
-    for (const QString &language_name : sorted_languages) {
-        languageLocaleMap.insert(language_name, language_map[language_name]);
-    }
-
-    return sorted_languages;
-}
-
-void InstallerPrompt::onLanguageChanged(int index) {
-    selectedLanguage = ui->languageComboBox->itemText(index);
-}
-
-void InstallerPrompt::onLanguageConfirm() {
-    ui->changingLanguageLabel->setVisible(true);
-    ui->changingLanguageLoader->setVisible(true);
-    ui->languageComboBox->setEnabled(false);
-    ui->tryLubuntu->setEnabled(false);
-    ui->installLubuntu->setEnabled(false);
-
-    localeName = languageLocaleMap.value(selectedLanguage);
-    qDebug() << selectedLanguage << localeName;
-
-    // Split the locale name to get language and country code
-    QStringList localeParts = localeName.split('_');
-    QString languageCode = localeParts.value(0);
-    QString countryCode = localeParts.value(1);
-
-    // If there is no internet connection and we don't ship the langpack, tell them
-    QStringList allowedLanguages = {"zh-hans", "hi", "es", "fr", "ar", "en"};
-    bool only_lxqt = false;
-    if (!allowedLanguages.contains(languageCode) && NetworkManager::status() != NetworkManager::Status::Connected) {
-        ui->changingLanguageLabel->setText(tr("Unable to download full language support, changing anyway..."));
-        only_lxqt = true;
-    } else {
-        ui->changingLanguageLabel->setText(tr("Changing language..."));
-    }
-
-    // Some of the LibreOffice language packs need special-casing, do that here
-    QString libreOfficeLang;
-    if (localeParts[0] == "zh") {
-        libreOfficeLang = (countryCode == "CN" || countryCode == "SG" || countryCode == "MY") ? "zh-cn" : "zh-tw";
-    } else {
-        static const QMap<QString, QString> localeMap = {
-            {"en_GB", "en-gb"}, {"en_ZA", "en-za"}, {"pa_IN", "pa-in"}, {"pt_BR", "pt-br"}
-        };
-        libreOfficeLang = localeMap.value(localeParts.join('_'), languageCode);
-    }
-
-    // Construct the command to run the script with parameters
-    QProcess *process = new QProcess(this);
-    QStringList arguments;
-
-    process->setProgram("/usr/libexec/change-system-language");
-    arguments << languageCode << countryCode << libreOfficeLang;
-    if (only_lxqt) arguments << "1";
-    process->setArguments(arguments);
-
-    connect(process, static_cast<void(QProcess::*)(int, QProcess::ExitStatus)>(&QProcess::finished), this, &InstallerPrompt::languageProcessFinished);
-    connect(process, &QProcess::errorOccurred, this, &InstallerPrompt::languageProcessError);
-    process->start();
-}
-
-void InstallerPrompt::languageProcessFinished(int exitCode, QProcess::ExitStatus exitStatus) {
-    qDebug() << "Process finished. Exit code:" << exitCode << "Exit status:" << exitStatus;
-    ui->changingLanguageLabel->setVisible(false);
-    ui->changingLanguageLoader->setVisible(false);
-    ui->languageComboBox->setEnabled(true);
-    ui->tryLubuntu->setEnabled(true);
-    ui->installLubuntu->setEnabled(true);
-}
-
-void InstallerPrompt::languageProcessError(QProcess::ProcessError error) {
-    qDebug() << "Process failed with error:" << error;
-}
-
-void InstallerPrompt::tryLubuntu()
-{
-    QApplication::quit();
-}
-
-void InstallerPrompt::installLubuntu()
-{
-    ui->tryLubuntu->setVisible(false);
-    ui->installLubuntu->setVisible(false);
-    ui->confirmButton->setVisible(false);
-    ui->languageComboBox->setEnabled(false);
-    QProcess *calamares = new QProcess(this);
-    QStringList args;
-    calamares->start("/usr/libexec/lubuntu-installer", args);
-
-    // If Calamares exits, it either crashed or the user cancelled the installation. Exit the installer prompt (and start LXQt).
-    connect(calamares, SIGNAL(finished(int)), this, SLOT(tryLubuntu()));
-}
-
-InstallerPrompt::~InstallerPrompt()
-{
-    delete ui;
 }

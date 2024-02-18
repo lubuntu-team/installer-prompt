@@ -26,6 +26,12 @@ set(PROJECT_SOURCES
     src/backgroundscreen.h
     src/backgroundscreen.cpp
     src/resource.qrc
+    src/wifipassworddialog.h
+    src/wifipassworddialog.cpp
+    src/wifipassworddialog.ui
+    src/languagechangedialog.h
+    src/languagechangedialog.cpp
+    src/languagechangedialog.ui
 )
 
 set(TRANSLATION_RESOURCES "src/translations.qrc")
@@ -51,7 +57,6 @@ install(TARGETS lubuntu-installer-prompt
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
 install(PROGRAMS "scripts/change-system-language" DESTINATION libexec)
-install(PROGRAMS "scripts/lubuntu-installer" DESTINATION libexec)
 install(PROGRAMS "scripts/start-lubuntu-live-env" DESTINATION libexec)
 install(FILES "lubuntu-live-environment.desktop" DESTINATION share/xsessions)
 

@@ -40,12 +40,14 @@ int main(int argc, char *argv[])
     for (QScreen *screen : QApplication::screens()) {
         if (screen == QApplication::primaryScreen()) {
             w = new InstallerPrompt();
-	    w->setGeometry(screen->geometry());
+            w->setGeometry(screen->geometry());
+            w->activateBackground();
             w->showFullScreen();
             continue;
         }
         BackgroundScreen *backscreen = new BackgroundScreen();
         backscreen->setGeometry(screen->geometry());
+        backscreen->activateBackground();
         backscreen->showFullScreen();
         bss.append(backscreen);
     }

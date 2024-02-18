@@ -9,6 +9,7 @@ class BackgroundScreen : public QWidget {
 public:
     explicit BackgroundScreen(QWidget *parent = nullptr);
     virtual ~BackgroundScreen();
+    void activateBackground();
 };
 
 #endif // BACKGROUNDSCREEN_H

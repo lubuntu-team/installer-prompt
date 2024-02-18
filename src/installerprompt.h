@@ -12,6 +12,7 @@
 #include <QProcess>
 #include <NetworkManagerQt/Device>
 #include <NetworkManagerQt/WirelessDevice>
+#include <NetworkManagerQt/WiredDevice>
 #include <NetworkManagerQt/WirelessNetwork>
 
 namespace Ui { class InstallerPrompt; }
@@ -22,40 +23,28 @@ class InstallerPrompt : public QMainWindow {
 public:
     explicit InstallerPrompt(QWidget *parent = nullptr);
     ~InstallerPrompt() override;
+    void activateBackground();
 
 private slots:
-    void refreshNetworkList();
-    void onLanguageChanged(int index);
-    void onLanguageConfirm();
-    void onConnectWifiClicked();
-    void updateConnectionStatus();
+    void onTryClicked();
+    void onInstallClicked();
+    void onLanguageSelected(int index);
+    void onNetworkSelected(int index);
+    void updateConnectionInfo();
     void handleWiFiConnectionChange(NetworkManager::Device::State newstate, NetworkManager::Device::State oldstate, NetworkManager::Device::StateChangeReason reason);
-    void tryLubuntu();
-    void installLubuntu();
-    void languageProcessFinished(int exitCode, QProcess::ExitStatus exitStatus);
     void languageProcessError(QProcess::ProcessError error);
 
 private:
     Ui::InstallerPrompt *ui;
-    QProcess *process;
     NetworkManager::WirelessDevice::Ptr wifiDevice;
-    QString wifiSSID;
-    QMutex wifiChangeMutex;
-    NetworkManager::Connection::Ptr findConnectionBySsid(const QString &ssid);
+    bool hitWifiDevice = false;
+    QString wifiSsid;
     bool wifiWrongHandling = false;
-    QLineEdit *passwordLineEdit;
     QMap<QString, QString> languageLocaleMap;
-    QString selectedLanguage = "English (United States)";
-    QString localeName = "en_US";
-    QString getDisplayNameForLocale(const QLocale &locale);
 
-    void handleWifiConnection(const QString &ssid, bool recoverFromWrongPassword = false);
-    QString promptForWifiPassword(const QString &ssid, bool isWrongPassword = false);
-    void connectToWifi(const QString &ssid, const QString &password, bool recoverFromWrongPassword = false);
     void initLanguageComboBox();
     QStringList getAvailableLanguages();
-    void showWifiOptions();
-    NMVariantMapMap createSettingsBySSID(const QString &ssid);
+    QString getDisplayNameForLocale(const QLocale &locale);
 };
 
 #endif // INSTALLERPROMPT_H
