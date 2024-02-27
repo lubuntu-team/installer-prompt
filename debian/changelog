@@ -3,6 +3,7 @@ lubuntu-installer-prompt (24.04.1) noble; urgency=medium
   * Switch to native packaging.
   * Fix several networking-related bugs.
   * Significant design improvements.
+  * Use Picom for X compositing so that transparency and rounded corners work. 
 
  -- Aaron Rainbolt <arraybolt3@ubuntu.com>  Tue, 27 Feb 2024 14:45:23 -0600
 
