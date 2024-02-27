@@ -25,7 +25,7 @@
 }
 
 QPushButton {
-    background-color: rgba(200, 200, 200, 0.8);
+    background-color: rgb(200, 200, 200);
     color: #ffffff;
     border-radius: 10px;
     padding: 10px 20px;
@@ -33,21 +33,26 @@ QPushButton {
 }
 
 QPushButton:hover {
-    background-color: rgba(30, 144, 255, 1);
+    background-color: rgb(30, 144, 255);
 }
 
 QPushButton:disabled {
-    background-color: rgba(169, 169, 169, 0.8);
+    background-color: rgb(169, 169, 169);
     color: #ffffff;
 }
 
 QComboBox, QLineEdit {
-    background-color: #3b5da2;
-    color: #ffffff;
-    border: 1px solid #ffffff;
-    border-radius: 10px;
-    padding: 5px;
-    margin: 5px;
+/*    background-color: #315764; */
+/*    background-color: #729fa5;  */
+    background-color: #044b8a;
+    color: #ddd;
+    border: 1px solid #ddd;
+    border-radius: 15px;
+    padding: 6px 12px;
+}
+
+QComboBox:hover {
+    background-color: #6172d1; color: #fff; border-color: #fff;
 }
 
 QComboBox::drop-down {
@@ -62,6 +67,7 @@ QComboBox::down-arrow {
 
 QLabel {
     color: #ffffff;
+    margin-right: 12px;
 }
 
 QLabel#logoLabel {
@@ -69,12 +75,20 @@ QLabel#logoLabel {
     background-color: transparent;
 }
 
-QLabel#incorrectPassword {
-    color: red;
+QPushButton {
+	background-color: #044b8a; color: #eee; border: 1px solid #ddd; border-radius: 15px;
 }
 
-KBusyIndicatorWidget {
-    color: blue;
+QPushButton:hover {
+    background-color: #6172d1; color: #fff; border-color: #fff;
+}
+
+QPushButton:disabled {
+    background-color: #808080; color: white; border-radius: 15px;
+}
+
+QToolTip {
+	background-color: rgba(230, 230, 230, 0.85); padding: 12px; border-radius: 15px; border: 1px solid #e4e4e4; font: 12px 'Ubuntu Light'; color: #696b6f; line-height: 18px;
 }</string>
   </property>
   <widget class="QWidget" name="centralwidget">
@@ -199,38 +213,10 @@ KBusyIndicatorWidget {
            </font>
           </property>
           <property name="text">
-           <string>Select Your Language:</string>
+           <string>Select Your Language</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QComboBox" name="networkComboBox">
-          <property name="sizePolicy">
-           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-            <horstretch>0</horstretch>
-            <verstretch>0</verstretch>
-           </sizepolicy>
-          </property>
-          <property name="minimumSize">
-           <size>
-            <width>500</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="maximumSize">
-           <size>
-            <width>500</width>
-            <height>50</height>
-           </size>
-          </property>
-          <property name="font">
-           <font>
-            <family>Ubuntu</family>
-            <pointsize>16</pointsize>
-           </font>
           </property>
          </widget>
         </item>
@@ -260,9 +246,43 @@ KBusyIndicatorWidget {
             <pointsize>16</pointsize>
            </font>
           </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
          </widget>
         </item>
-        <item row="1" column="0">
+        <item row="2" column="1">
+         <widget class="QComboBox" name="networkComboBox">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>500</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>500</width>
+            <height>50</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Ubuntu</family>
+            <pointsize>16</pointsize>
+           </font>
+          </property>
+          <property name="cursor">
+           <cursorShape>PointingHandCursor</cursorShape>
+          </property>
+         </widget>
+        </item>
+        <item row="2" column="0">
          <widget class="QLabel" name="WiFiLabel">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
@@ -278,12 +298,28 @@ KBusyIndicatorWidget {
            </font>
           </property>
           <property name="text">
-           <string>Internet Connection:</string>
+           <string>Internet Connection</string>
           </property>
           <property name="alignment">
            <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
           </property>
          </widget>
+        </item>
+        <item row="1" column="1">
+         <spacer name="verticalSpacer_6">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeType">
+           <enum>QSizePolicy::Fixed</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>36</height>
+           </size>
+          </property>
+         </spacer>
         </item>
        </layout>
       </item>
@@ -367,23 +403,14 @@ KBusyIndicatorWidget {
           <bold>false</bold>
          </font>
         </property>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
+        </property>
         <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Try Lubuntu without installing it on your system. Allows you to use programs, browse the Web, and even temporarily install apps without modifying your system. Changes made within the live environment will be lost when the computer shuts down.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>&lt;p&gt;&lt;span style=&quot;font-size:18px; color: #333; margin-bottom: 0;&quot;&gt;Run live environment&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-size:16px;&quot;&gt;Run Lubuntu from the installation media without changing a system disk. Changes made to this environment will not be saved when the computer is shut down.&lt;/span&gt;&lt;/p&gt;</string>
         </property>
         <property name="autoFillBackground">
          <bool>false</bool>
-        </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton {
-	background-color: #3b5da2; color: white; border-radius: 10px;
-}
-QPushButton:disabled {
-    background-color: #808080; color: white; border-radius: 10px;
-}
-QToolTip {
-	background-color: rgb(150, 150, 150); color: white; border: 1px solid black;
-	font: 9pt &quot;Ubuntu&quot;;
-}</string>
         </property>
         <property name="text">
          <string>  Try Lubuntu</string>
@@ -434,20 +461,14 @@ QToolTip {
           <bold>false</bold>
          </font>
         </property>
-        <property name="toolTip">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-size:12pt;&quot;&gt;Install Lubuntu onto your system. You can install Lubuntu by itself, or alongside an existing operating system.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        <property name="cursor">
+         <cursorShape>PointingHandCursor</cursorShape>
         </property>
-        <property name="styleSheet">
-         <string notr="true">QPushButton {
-	background-color: #3b5da2; color: white; border-radius: 10px;
-}
-QPushButton:disabled {
-    background-color: #808080; color: white; border-radius: 10px;
-}
-QToolTip {
-	background-color: rgb(150, 150, 150); color: white; border: 1px solid black;
-	font: 9pt &quot;Ubuntu&quot;;
-}</string>
+        <property name="toolTip">
+         <string>&lt;p&gt;&lt;span style=&quot;font-size:18px; color: #333; margin-bottom: 0;&quot;&gt;Install to this system&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot;font-size:16px;&quot;&gt;Install Lubuntu to a system disk by itself, or alongside an existing operating system.&lt;/span&gt;&lt;/p&gt;</string>
+        </property>
+        <property name="autoFillBackground">
+         <bool>false</bool>
         </property>
         <property name="text">
          <string>  Install Lubuntu</string>

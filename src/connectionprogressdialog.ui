@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LanguageChangeDialog</class>
- <widget class="QDialog" name="LanguageChangeDialog">
+ <class>ConnectionProgressDialog</class>
+ <widget class="QDialog" name="ConnectionProgressDialog">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>373</width>
-    <height>66</height>
+    <width>263</width>
+    <height>72</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -20,12 +20,28 @@
    <item>
     <widget class="QLabel" name="label">
      <property name="text">
-      <string>Changing language...</string>
+      <string>Connecting...</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
      </property>
      <property name="alignment">
       <set>Qt::AlignCenter</set>
      </property>
     </widget>
+   </item>
+   <item>
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>20</width>
+       <height>40</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item>
     <widget class="QProgressBar" name="progressBar">

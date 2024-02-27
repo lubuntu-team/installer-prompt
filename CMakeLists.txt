@@ -32,6 +32,12 @@ set(PROJECT_SOURCES
     src/languagechangedialog.h
     src/languagechangedialog.cpp
     src/languagechangedialog.ui
+    src/warningdialog.h
+    src/warningdialog.cpp
+    src/warningdialog.ui
+    src/connectionprogressdialog.h
+    src/connectionprogressdialog.cpp
+    src/connectionprogressdialog.ui
 )
 
 set(TRANSLATION_RESOURCES "src/translations.qrc")

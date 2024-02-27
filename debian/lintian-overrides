@@ -1,0 +1,3 @@
+lubuntu-installer-prompt: no-manual-page [usr/bin/lubuntu-installer-prompt]
+lubuntu-installer-prompt: desktop-entry-lacks-icon-entry [usr/share/xsessions/lubuntu-live-environment.desktop]
+lubuntu-installer-prompt: desktop-entry-lacks-keywords-entry [usr/share/xsessions/lubuntu-live-environment.desktop]

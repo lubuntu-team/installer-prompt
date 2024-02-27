@@ -28,18 +28,21 @@
 #include <QScreen>
 #include <QTimer>
 #include <QFile>
-#include <QMessageBox>
 #include <QUuid>
 #include <QDBusPendingReply>
 #include "installerprompt.h"
 #include "wifipassworddialog.h"
 #include "languagechangedialog.h"
+#include "warningdialog.h"
+#include "connectionprogressdialog.h"
 #include "./ui_installerprompt.h"
 
 InstallerPrompt::InstallerPrompt(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::InstallerPrompt) {
     ui->setupUi(this);
+
+    cpd = new ConnectionProgressDialog();
 
     updateConnectionInfo();
 
@@ -49,6 +52,15 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     connect(ui->installLubuntu, &QPushButton::clicked, this, &InstallerPrompt::onInstallClicked);
     connect(ui->languageComboBox, SIGNAL(activated(int)), this, SLOT(onLanguageSelected(int)));
     connect(ui->networkComboBox, SIGNAL(activated(int)), this, SLOT(onNetworkSelected(int)));
+
+    auto nm = NetworkManager::notifier();
+    connect(nm, &NetworkManager::Notifier::deviceAdded, this, &InstallerPrompt::updateConnectionInfo);
+    connect(nm, &NetworkManager::Notifier::deviceRemoved, this, &InstallerPrompt::updateConnectionInfo);
+    connect(nm, &NetworkManager::Notifier::activeConnectionsChanged, this, &InstallerPrompt::updateConnectionInfo);
+    connect(nm, &NetworkManager::Notifier::wirelessEnabledChanged, this, &InstallerPrompt::updateConnectionInfo);
+    connect(nm, &NetworkManager::Notifier::activeConnectionAdded, this, &InstallerPrompt::updateConnectionInfo);
+    connect(nm, &NetworkManager::Notifier::connectivityChanged, this, &InstallerPrompt::updateConnectionInfo);
+    connect(nm, &NetworkManager::Notifier::primaryConnectionChanged, this, &InstallerPrompt::updateConnectionInfo);
 
     QTimer *repeater = new QTimer();
     connect(repeater, SIGNAL(timeout()), this, SLOT(updateConnectionInfo()));
@@ -65,7 +77,7 @@ void InstallerPrompt::activateBackground()
     // Set the background image and scale it
     QImage image(":/background");
     if (image.isNull()) {
-        QMessageBox::warning(this, tr("Error"), tr("Background image cannot be loaded."));
+        WarningDialog::showWarning(tr("Background image cannot be loaded."));
         return;
     }
 
@@ -170,9 +182,11 @@ void InstallerPrompt::onNetworkSelected(int index)
 
             NetworkManager::Connection::List availableConnections = wiredDevice.availableConnections();
             if (availableConnections.count() > 0) {
+                QString ethernetName = ui->networkComboBox->itemText(index).split(":")[0];
                 NetworkManager::activateConnection(availableConnections[0]->path(), wiredDevice.uni(), QString());
+                cpd->setNetworkName(ethernetName);
             } else {
-                QMessageBox::warning(this, tr("Error"), tr("Selected Ethernet device has no network!"));
+                WarningDialog::showWarning(tr("Selected Ethernet device has no network!"));
             }
         } else { // this is a Wifi connection
             wifiSsid = networkId.right(networkId.length() - 4);
@@ -189,6 +203,7 @@ void InstallerPrompt::onNetworkSelected(int index)
             }
             if (targetConnection) {
                 NetworkManager::activateConnection(targetConnection->path(), wifiDevice->uni(), QString());
+                cpd->setNetworkName(wifiSsid);
             } else {
                 WifiPasswordDialog wpd(wifiSsid);
                 wpd.exec();
@@ -223,12 +238,13 @@ void InstallerPrompt::onNetworkSelected(int index)
                 QDBusPendingReply<QDBusObjectPath> reply = NetworkManager::addConnection(wifiSettings);
                 reply.waitForFinished();
                 if (reply.isError()) {
-                    QMessageBox::warning(this, tr("Error"), tr("Failed to add WiFi connection."));
+                    WarningDialog::showWarning(tr("Failed to add WiFi connection."));
                     return;
                 }
 
                 QDBusObjectPath path = reply.value();
                 NetworkManager::activateConnection(path.path(), wifiDevice->uni(), QString());
+                cpd->setNetworkName(wifiSsid);
             }
         }
     }
@@ -261,11 +277,14 @@ void InstallerPrompt::updateConnectionInfo()
         }
         if (hitWifiDevice) {
             NetworkManager::ActiveConnection::Ptr activeConnection = wifiDevice->activeConnection();
-            NetworkManager::Connection::Ptr underlyingActiveConnection = activeConnection->connection();
+            NetworkManager::Connection::Ptr underlyingActiveConnection;
+            if (activeConnection != nullptr) {
+                underlyingActiveConnection = activeConnection->connection();
+            }
             for (const auto &network : wifiDevice->networks()) {
                 QString ssid = network->ssid();
                 bool isNetworkConnected = false;
-                if (activeConnection->state() == NetworkManager::ActiveConnection::Activated) {
+                if (activeConnection != nullptr && activeConnection->state() == NetworkManager::ActiveConnection::Activated) {
                     NetworkManager::WirelessSetting::Ptr underlyingWirelessSetting = underlyingActiveConnection->settings()->setting(NetworkManager::Setting::Wireless).staticCast<NetworkManager::WirelessSetting>();
                     if (network->ssid() == QString(underlyingWirelessSetting->ssid())) {
                         isNetworkConnected = true;
@@ -283,6 +302,12 @@ void InstallerPrompt::updateConnectionInfo()
     if (hitConnectedNetwork) {
         ui->networkComboBox->setCurrentIndex(connectedDevice);
     }
+
+    if (NetworkManager::status() == NetworkManager::Connecting) {
+        cpd->exec();
+    } else {
+        cpd->done(0);
+    }
 }
 
 void InstallerPrompt::handleWiFiConnectionChange(NetworkManager::Device::State newstate, NetworkManager::Device::State oldstate, NetworkManager::Device::StateChangeReason reason)
@@ -297,7 +322,7 @@ void InstallerPrompt::handleWiFiConnectionChange(NetworkManager::Device::State n
                     qDebug() << "Wiping connection with wrong password: " << wifiSsid;
                     QDBusPendingReply removeReply = connection->remove();
                     removeReply.waitForFinished();
-                    QMessageBox::warning(this, tr("Error"), tr("WiFi password was incorrect."));
+                    WarningDialog::showWarning(tr("WiFi password was incorrect."));
                 }
             }
         }
@@ -342,7 +367,7 @@ QStringList InstallerPrompt::getAvailableLanguages() {
             if (lineParts.count() == 1) {
                 lineParts = line.split(' ');
                 if (lineParts.count() == 1) {
-                    QMessageBox::warning(this, tr("Error"), tr("Something has gone very wrong trying to parse the list of supported languages!"));
+                    WarningDialog::showWarning(tr("Something has gone very wrong trying to parse the list of supported languages!"));
                 }
             }
             supported_languages.append(lineParts[0]);

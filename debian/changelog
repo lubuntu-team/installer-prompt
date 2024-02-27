@@ -1,0 +1,41 @@
+lubuntu-installer-prompt (24.04.1) noble; urgency=medium
+
+  * Switch to native packaging.
+  * Fix several networking-related bugs.
+  * Significant design improvements.
+
+ -- Aaron Rainbolt <arraybolt3@ubuntu.com>  Tue, 27 Feb 2024 14:45:23 -0600
+
+lubuntu-installer-prompt (1.1.2-0ubuntu1) noble; urgency=medium
+
+  * New upstream release (LP: #2047379).
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Mon, 01 Jan 2024 13:56:49 -0600
+
+lubuntu-installer-prompt (1.1.1-0ubuntu2) noble; urgency=medium
+
+  * Ensure C is not the default locale, to the user.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Sat, 23 Dec 2023 18:03:34 -0600
+
+lubuntu-installer-prompt (1.1.1-0ubuntu1) noble; urgency=medium
+
+  * New upstream release (LP: #2046099).
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Sat, 23 Dec 2023 17:06:34 -0600
+
+lubuntu-installer-prompt (1.0.1-0ubuntu1) noble; urgency=medium
+
+  * New upstream release.
+  * Update Standards-version to 4.6.2, no changes needed.
+  * Update Vcs-*.
+  * Update build dependencies.
+  * Update Lintian overrides.
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Sat, 09 Dec 2023 15:07:07 -0600
+
+lubuntu-installer-prompt (0.2.0-0ubuntu1) kinetic; urgency=medium
+
+  * Initial release.
+
+ -- Aaron Rainbolt <arraybolt3@gmail.com>  Thu, 30 Jun 2022 18:04:08 -0500

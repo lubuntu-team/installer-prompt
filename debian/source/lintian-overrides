@@ -1,0 +1,2 @@
+# We intentionally switched from quilt packaging to native.
+lubuntu-installer-prompt source: odd-historical-debian-changelog-version *

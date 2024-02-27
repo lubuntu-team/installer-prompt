@@ -15,6 +15,8 @@
 #include <NetworkManagerQt/WiredDevice>
 #include <NetworkManagerQt/WirelessNetwork>
 
+class ConnectionProgressDialog;
+
 namespace Ui { class InstallerPrompt; }
 
 class InstallerPrompt : public QMainWindow {
@@ -36,6 +38,7 @@ private slots:
 
 private:
     Ui::InstallerPrompt *ui;
+    ConnectionProgressDialog *cpd;
     NetworkManager::WirelessDevice::Ptr wifiDevice;
     bool hitWifiDevice = false;
     QString wifiSsid;

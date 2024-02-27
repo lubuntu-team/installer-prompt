@@ -1,0 +1,28 @@
+Source: lubuntu-installer-prompt
+Maintainer: Lubuntu Developers <lubuntu-devel@lists.ubuntu.com>
+Uploaders: Simon Quigley <tsimonq2@ubuntu.com>,
+           Aaron Rainbolt <arraybolt3@gmail.com>
+Section: misc
+Priority: optional
+Build-Depends: cmake,
+               debhelper-compat (= 13),
+               extra-cmake-modules,
+               libkf5networkmanagerqt-dev,
+               libkf5widgetsaddons-dev,
+               qtbase5-dev,
+               qttools5-dev
+Standards-Version: 4.6.2
+Vcs-Browser: https://git.lubuntu.me/Lubuntu/installer-prompt-packaging
+Vcs-Git: https://git.lubuntu.me/Lubuntu/installer-prompt-packaging.git
+Homepage: https://lubuntu.me
+Rules-Requires-Root: no
+
+Package: lubuntu-installer-prompt
+Architecture: any
+Depends: calamares-settings-lubuntu, ${misc:Depends}, ${shlibs:Depends}
+Pre-Depends: ${misc:Pre-Depends}
+Description: Live ISO prompt for trying or installing Lubuntu
+ This application displays a screen allowing the user to either try or
+ install Lubuntu after booting the Lubuntu ISO file. It auto-launches
+ when the ISO is first booted, and will either launch Calamares or LXQt,
+ depending on the user's choice.

@@ -7,6 +7,7 @@ WifiPasswordDialog::WifiPasswordDialog(QString ssid, QWidget *parent) :
 {
     ui->setupUi(this);
     ui->wifiLabel->setText(tr("Enter password for %1:").arg(ssid));
+    connect(ui->connectButton, &QPushButton::clicked, this, &WifiPasswordDialog::onConnectClicked);
 }
 
 WifiPasswordDialog::~WifiPasswordDialog()
