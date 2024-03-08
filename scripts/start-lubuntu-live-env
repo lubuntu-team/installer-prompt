@@ -12,7 +12,7 @@ export QT_QPA_PLATFORMTHEME="lxqt"
 
 openbox &
 picom &
-sudo -E lubuntu-installer-prompt # This is intentionally *not* backgrounded.
+lubuntu-installer-prompt # This is intentionally *not* backgrounded.
 # If it exits...
 killall picom
 killall openbox

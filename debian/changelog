@@ -1,3 +1,13 @@
+lubuntu-installer-prompt (24.04.2) noble; urgency=medium
+
+  * Remove a spurious d/source/options file resulting in the whole Git repo
+    being uploaded with the source package.
+  * Don't start the prompt using sudo, it's unnecessary and results in odd
+    permissions issues.
+  * Add support for open WiFi networks. (LP: #2056603)
+
+ -- Aaron Rainbolt <arraybolt3@ubuntu.com>  Fri, 08 Mar 2024 23:49:22 +0000
+
 lubuntu-installer-prompt (24.04.1) noble; urgency=medium
 
   * Switch to native packaging.

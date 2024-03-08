@@ -190,9 +190,21 @@ void InstallerPrompt::onNetworkSelected(int index)
             }
         } else { // this is a Wifi connection
             wifiSsid = networkId.right(networkId.length() - 4);
+            bool isPasswordProtected = true;
+
+            for (const auto &network : wifiDevice->networks()) {
+                if (network->ssid() == wifiSsid) {
+                    NetworkManager::AccessPoint::Ptr ap = network->referenceAccessPoint();
+                    if (!ap->capabilities().testFlag(NetworkManager::AccessPoint::Privacy)) {
+                        isPasswordProtected = false;
+                    }
+                }
+            }
+
             QDBusPendingReply reply = wifiDevice->disconnectInterface();
             reply.waitForFinished();
             NetworkManager::Connection::Ptr targetConnection;
+
             foreach (const NetworkManager::Connection::Ptr &connection, NetworkManager::listConnections()) {
                 if (connection->settings()->connectionType() == NetworkManager::ConnectionSettings::Wireless) {
                     auto wirelessSetting = connection->settings()->setting(NetworkManager::Setting::Wireless).dynamicCast<NetworkManager::WirelessSetting>();
@@ -201,17 +213,11 @@ void InstallerPrompt::onNetworkSelected(int index)
                     }
                 }
             }
+
             if (targetConnection) {
                 NetworkManager::activateConnection(targetConnection->path(), wifiDevice->uni(), QString());
                 cpd->setNetworkName(wifiSsid);
             } else {
-                WifiPasswordDialog wpd(wifiSsid);
-                wpd.exec();
-                QString password = wpd.getPassword();
-                if (password.isEmpty()) {
-                    return;
-                }
-
                 NMVariantMapMap wifiSettings;
                 if (!wifiDevice) {
                     qWarning() << "WiFi device not found. Unable to set interface name.";
@@ -230,10 +236,18 @@ void InstallerPrompt::onNetworkSelected(int index)
                     wifiSettings.insert(key, value.toMap());
                 }
 
-                QVariantMap wirelessSecurity;
-                wirelessSecurity["key-mgmt"] = "wpa-psk";
-                wirelessSecurity["psk"] = password;
-                wifiSettings["802-11-wireless-security"] = wirelessSecurity;
+                if (isPasswordProtected) {
+                    WifiPasswordDialog wpd(wifiSsid);
+                    wpd.exec();
+                    QString password = wpd.getPassword();
+                    if (password.isEmpty()) {
+                        return;
+                    }
+                    QVariantMap wirelessSecurity;
+                    wirelessSecurity["key-mgmt"] = "wpa-psk";
+                    wirelessSecurity["psk"] = password;
+                    wifiSettings["802-11-wireless-security"] = wirelessSecurity;
+                }
 
                 QDBusPendingReply<QDBusObjectPath> reply = NetworkManager::addConnection(wifiSettings);
                 reply.waitForFinished();
