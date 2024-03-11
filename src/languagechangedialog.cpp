@@ -1,6 +1,8 @@
 #include "languagechangedialog.h"
 #include "ui_languagechangedialog.h"
 
+#include <QCloseEvent>
+
 LanguageChangeDialog::LanguageChangeDialog(QWidget *parent) :
     QDialog(parent),
     ui(new Ui::LanguageChangeDialog)
@@ -11,4 +13,9 @@ LanguageChangeDialog::LanguageChangeDialog(QWidget *parent) :
 LanguageChangeDialog::~LanguageChangeDialog()
 {
     delete ui;
+}
+
+void LanguageChangeDialog::closeEvent(QCloseEvent *event)
+{
+    event->ignore();
 }

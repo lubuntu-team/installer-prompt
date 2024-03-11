@@ -16,6 +16,9 @@ public:
     ~WifiPasswordDialog();
     QString getPassword();
 
+protected slots:
+    void closeEvent(QCloseEvent *event) override;
+
 private slots:
     void onConnectClicked();
 

@@ -16,6 +16,9 @@ public:
     ~ConnectionProgressDialog();
     void setNetworkName(QString name);
 
+protected slots:
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::ConnectionProgressDialog *ui;
 };

@@ -1,3 +1,10 @@
+lubuntu-installer-prompt (24.04.3) noble; urgency=medium
+
+  * Don't let people close modal windows so they don't accidentally confuse
+    the prompt and mess up their system.
+
+ -- Aaron Rainbolt <arraybolt3@ubuntu.com>  Mon, 11 Mar 2024 18:14:21 -0500
+
 lubuntu-installer-prompt (24.04.2) noble; urgency=medium
 
   * Remove a spurious d/source/options file resulting in the whole Git repo

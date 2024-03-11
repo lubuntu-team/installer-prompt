@@ -15,6 +15,9 @@ public:
     explicit LanguageChangeDialog(QWidget *parent = nullptr);
     ~LanguageChangeDialog();
 
+protected slots:
+    void closeEvent(QCloseEvent *event) override;
+
 private:
     Ui::LanguageChangeDialog *ui;
 };
