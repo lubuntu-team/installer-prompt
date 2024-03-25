@@ -44,8 +44,6 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
 
     cpd = new ConnectionProgressDialog();
 
-    updateConnectionInfo();
-
     initLanguageComboBox();
 
     connect(ui->tryLubuntu, &QPushButton::clicked, this, &InstallerPrompt::onTryClicked);
@@ -65,6 +63,8 @@ InstallerPrompt::InstallerPrompt(QWidget *parent)
     QTimer *repeater = new QTimer();
     connect(repeater, SIGNAL(timeout()), this, SLOT(updateConnectionInfo()));
     repeater->start(15000);
+    
+    updateConnectionInfo();
 }
 
 InstallerPrompt::~InstallerPrompt()
@@ -317,10 +317,14 @@ void InstallerPrompt::updateConnectionInfo()
         ui->networkComboBox->setCurrentIndex(connectedDevice);
     }
 
-    if (NetworkManager::status() == NetworkManager::Connecting) {
-        cpd->exec();
+    if (!firstUpdateConnectionInfoCall) {
+        if (NetworkManager::status() == NetworkManager::Connecting) {
+            cpd->exec();
+        } else {
+            cpd->done(0);
+        }
     } else {
-        cpd->done(0);
+        firstUpdateConnectionInfoCall = false;
     }
 }
 

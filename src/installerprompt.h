@@ -44,6 +44,7 @@ private:
     QString wifiSsid;
     bool wifiWrongHandling = false;
     QMap<QString, QString> languageLocaleMap;
+    bool firstUpdateConnectionInfoCall = true;
 
     void initLanguageComboBox();
     QStringList getAvailableLanguages();
