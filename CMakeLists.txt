@@ -8,7 +8,7 @@ set(CMAKE_AUTORCC ON)
 
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_INSTALL_PREFIX "/usr")
+set(CMAKE_INSTALL_PREFIX "/")
 
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
@@ -62,9 +62,11 @@ install(TARGETS lubuntu-installer-prompt
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-install(PROGRAMS "scripts/change-system-language" DESTINATION libexec)
-install(PROGRAMS "scripts/start-lubuntu-live-env" DESTINATION libexec)
-install(FILES "lubuntu-live-environment.desktop" DESTINATION share/xsessions)
+install(PROGRAMS "scripts/change-system-language" DESTINATION usr/libexec)
+install(PROGRAMS "scripts/start-lubuntu-live-env" DESTINATION usr/libexec)
+install(FILES "lubuntu-live-environment.desktop" DESTINATION usr/share/xsessions)
+install(FILES "rc.xml" DESTINATION etc/xdg/xdg-lubuntu-live-environment/openbox)
+install(FILES "panel.conf" DESTINATION etc/xdg/xdg-lubuntu-live-environment/lxqt)
 
 if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(lubuntu-installer-prompt)

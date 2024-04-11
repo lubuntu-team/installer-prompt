@@ -1,3 +1,10 @@
+lubuntu-installer-prompt (24.04.5) noble; urgency=medium
+
+  * Reduce desktops to 1 to prevent accidental switching. (LP: #1469362) 
+  * Remove desktop switcher from panel for a cleaner look.
+
+ -- Walter Lapchynski <wxl@ubuntu.com>  Wed, 10 Apr 2024 23:08:27 +0000
+
 lubuntu-installer-prompt (24.04.4) noble; urgency=medium
 
   * Fix a race condition where a wired network connection could hang the

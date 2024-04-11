@@ -2,7 +2,7 @@
 # Starts the Lubuntu Live Environment.
 
 # This is pretty overkill, but don't remove anything without testing
-export XDG_CONFIG_DIRS="/etc/xdg/xdg-Lubuntu:"$XDG_CONFIG_DIRS
+export XDG_CONFIG_DIRS="/etc/xdg/xdg-lubuntu-live-environment:/etc/xdg/xdg-Lubuntu:"$XDG_CONFIG_DIRS
 export XDG_DATA_DIRS="/usr/share/Lubuntu:"$XDG_DATA_DIRS
 export XDG_SESSION_CLASS="user"
 export XDG_SESSION_DESKTOP="Lubuntu"
