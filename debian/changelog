@@ -1,3 +1,10 @@
+lubuntu-installer-prompt (24.04.6) noble; urgency=medium
+
+  * Launch Calamares in OEM mode when "oem-config/enable=true" is passed as a
+    boot parameter (LP: #2063291).
+
+ -- Simon Quigley <tsimonq2@ubuntu.com>  Wed, 24 Apr 2024 00:20:14 -0500
+
 lubuntu-installer-prompt (24.04.5) noble; urgency=medium
 
   * Reduce desktops to 1 to prevent accidental switching. (LP: #1469362) 
