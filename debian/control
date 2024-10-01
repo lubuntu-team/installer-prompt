@@ -7,10 +7,9 @@ Priority: optional
 Build-Depends: cmake,
                debhelper-compat (= 13),
                extra-cmake-modules,
-               libkf5networkmanagerqt-dev,
-               libkf5widgetsaddons-dev,
-               qtbase5-dev,
-               qttools5-dev
+               libkf6networkmanagerqt-dev,
+               qt6-base-dev,
+               qt6-tools-dev
 Standards-Version: 4.6.2
 Vcs-Browser: https://git.lubuntu.me/Lubuntu/installer-prompt-packaging
 Vcs-Git: https://git.lubuntu.me/Lubuntu/installer-prompt-packaging.git

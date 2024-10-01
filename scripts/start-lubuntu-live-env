@@ -7,7 +7,7 @@ export XDG_DATA_DIRS="/usr/share/Lubuntu:"$XDG_DATA_DIRS
 export XDG_SESSION_CLASS="user"
 export XDG_SESSION_DESKTOP="Lubuntu"
 export DESKTOP_SESSION="Lubuntu"
-export QT_STYLE_OVERRIDE="Breeze"
+export QT_STYLE_OVERRIDE="kvantum"
 export QT_QPA_PLATFORMTHEME="lxqt"
 
 openbox &

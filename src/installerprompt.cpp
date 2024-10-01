@@ -29,6 +29,7 @@
 #include <QTimer>
 #include <QFile>
 #include <QUuid>
+#include <QPainter>
 #include <QDBusPendingReply>
 #include "installerprompt.h"
 #include "wifipassworddialog.h"
@@ -75,28 +76,25 @@ InstallerPrompt::~InstallerPrompt()
 void InstallerPrompt::activateBackground()
 {
     // Set the background image and scale it
-    QImage image(":/background");
-    if (image.isNull()) {
+    QImage rawImage(":/background");
+    if (rawImage.isNull()) {
         WarningDialog::showWarning(tr("Background image cannot be loaded."));
         return;
     }
 
-    qreal imgRatio = static_cast<qreal>(image.width()) / image.height();
+    qreal imgRatio = static_cast<qreal>(rawImage.width()) / rawImage.height();
     qreal screenRatio = static_cast<qreal>(this->width()) / this->height();
     QImage scaled;
     if (imgRatio < screenRatio) {
-        scaled = image.scaledToWidth(this->width(), Qt::SmoothTransformation);
+        scaled = rawImage.scaledToWidth(this->width(), Qt::SmoothTransformation);
         int yGap = (scaled.height() - this->height()) / 2;
         scaled = scaled.copy(0, yGap, scaled.width(), this->height());
     } else {
-        scaled = image.scaledToHeight(this->height(), Qt::SmoothTransformation);
+        scaled = rawImage.scaledToHeight(this->height(), Qt::SmoothTransformation);
         int xGap = (scaled.width() - this->width()) / 2;
         scaled = scaled.copy(xGap, 0, this->width(), scaled.height());
     }
-    QPixmap bg = QPixmap::fromImage(scaled);
-    QPalette palette;
-    palette.setBrush(QPalette::Window, bg);
-    this->setPalette(palette);
+    background = scaled;
 }
 
 void InstallerPrompt::onTryClicked()
@@ -175,7 +173,7 @@ void InstallerPrompt::onNetworkSelected(int index)
     QString networkId = ui->networkComboBox->itemData(index).toString();
     if (!networkId.isNull()) {
         if (networkId.left(4) == "UNI_") { // this is an Ethernet device
-            QString deviceUni = networkId.right(networkId.count() - 4);
+            QString deviceUni = networkId.right(networkId.length() - 4);
             NetworkManager::WiredDevice wiredDevice(deviceUni);
             QDBusPendingReply reply = wiredDevice.disconnectInterface();
             reply.waitForFinished();
@@ -430,9 +428,9 @@ QString InstallerPrompt::getDisplayNameForLocale(const QLocale &locale) {
 
     QLocale currentAppLocale = QLocale::system();
     QString nativeName = locale.nativeLanguageName();
-    QString nativeCountryName = sanitize(locale.nativeCountryName());
+    QString nativeCountryName = sanitize(locale.nativeTerritoryName());
     QString englishLanguageName = currentAppLocale.languageToString(locale.language());
-    QString englishCountryName = sanitize(currentAppLocale.countryToString(locale.country()));
+    QString englishCountryName = sanitize(currentAppLocale.territoryToString(locale.territory()));
 
     if (nativeName.isEmpty() || nativeCountryName.isEmpty()) {
         return QString();
@@ -451,4 +449,9 @@ QString InstallerPrompt::getDisplayNameForLocale(const QLocale &locale) {
     }
 
     return displayName;
+}
+
+void InstallerPrompt::paintEvent(QPaintEvent *event) {
+    QPainter painter(this);
+    painter.drawImage(0, 0, background);
 }

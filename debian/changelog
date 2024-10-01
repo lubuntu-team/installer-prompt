@@ -1,3 +1,12 @@
+lubuntu-installer-prompt (24.10.1) oracular; urgency=medium
+
+  * Update to use Qt 6.
+  * Fix the weird horizontal line at the bottom of the screen. (LP: #2081229)
+  * Update background image. (LP: #2081230)
+  * Use Kvantum theme by default to match the OS default. (LP: #2081233)
+
+ -- Aaron Rainbolt <arraybolt3@ubuntu.com>  Tue, 01 Oct 2024 09:30:57 -0500
+
 lubuntu-installer-prompt (24.04.6) noble; urgency=medium
 
   * Launch Calamares in OEM mode when "oem-config/enable=true" is passed as a

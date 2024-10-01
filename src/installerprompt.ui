@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>1450</width>
-    <height>710</height>
+    <height>604</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -18,6 +18,9 @@
   </property>
   <property name="windowTitle">
    <string>Try or Install Lubuntu</string>
+  </property>
+  <property name="autoFillBackground">
+   <bool>false</bool>
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget {
@@ -515,7 +518,6 @@ QToolTip {
     </item>
    </layout>
   </widget>
-  <widget class="QStatusBar" name="statusbar"/>
  </widget>
  <resources>
   <include location="resource.qrc"/>

@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.16)
 
-project(lubuntu-installer-prompt VERSION 1.1.2 LANGUAGES CXX)
+project(lubuntu-installer-prompt VERSION 2.0.0 LANGUAGES CXX)
 
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
@@ -12,9 +12,8 @@ set(CMAKE_INSTALL_PREFIX "/")
 
 find_package(ECM REQUIRED NO_MODULE)
 set(CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
-find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core Widgets Network LinguistTools)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Core Widgets Network LinguistTools)
-find_package(KF5 REQUIRED COMPONENTS NetworkManagerQt WidgetsAddons)
+find_package(Qt6 REQUIRED COMPONENTS Core Widgets Network LinguistTools)
+find_package(KF6 REQUIRED COMPONENTS NetworkManagerQt)
 
 file(GLOB TS_FILES "src/translations/lubuntu-installer-prompt_*.ts")
 
@@ -43,8 +42,8 @@ set(PROJECT_SOURCES
 set(TRANSLATION_RESOURCES "src/translations.qrc")
 
 configure_file(${TRANSLATION_RESOURCES} translations.qrc COPYONLY)
-qt5_add_translation(QM_FILES ${TS_FILES})
-qt5_add_resources(QM_RESOURCES ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
+qt_add_translation(QM_FILES ${TS_FILES})
+qt_add_resources(QM_RESOURCES ${CMAKE_CURRENT_BINARY_DIR}/translations.qrc)
 
 add_custom_target(translations ALL DEPENDS ${QM_FILES})
 
@@ -55,7 +54,7 @@ add_executable(lubuntu-installer-prompt
 
 add_dependencies(lubuntu-installer-prompt translations)
 
-target_link_libraries(lubuntu-installer-prompt PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt5::Network KF5::NetworkManagerQt KF5::WidgetsAddons)
+target_link_libraries(lubuntu-installer-prompt PRIVATE Qt6::Widgets Qt6::Network KF6::NetworkManagerQt)
 
 install(TARGETS lubuntu-installer-prompt
     BUNDLE DESTINATION .
