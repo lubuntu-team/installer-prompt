@@ -1,3 +1,10 @@
+lubuntu-installer-prompt (25.04.1) plucky; urgency=medium
+
+  * Update background image.
+  * Install main executable to /usr/bin rather than /bin.
+
+ -- Aaron Rainbolt <arraybolt3@ubuntu.com>  Tue, 04 Mar 2025 23:57:40 -0600
+
 lubuntu-installer-prompt (24.10.1) oracular; urgency=medium
 
   * Update to use Qt 6.
