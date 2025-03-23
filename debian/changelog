@@ -1,3 +1,9 @@
+lubuntu-installer-prompt (25.04.4) plucky; urgency=medium
+
+  * Update panel for the current default configuration. 
+
+ -- Walter Lapchynski <wxl@ubuntu.com>  Sun, 23 Mar 2025 01:18:05 +0000
+
 lubuntu-installer-prompt (25.04.3) plucky; urgency=medium
 
   * Removing desktop switch accidentially added to panel.
